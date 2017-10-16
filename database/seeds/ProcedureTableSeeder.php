@@ -1,0 +1,144 @@
+<?php
+
+use Illuminate\Database\Seeder;
+use App\Procedure;
+
+class ProcedureTableSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     *
+     * @return void
+     */
+    public function run()
+    {
+        //
+		Procedure::truncate();
+		Procedure::create([
+			'proc_ris_id'=>'MR003',
+			'type_id'=>1,
+			'name'=>'Brain-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR005',
+			'type_id'=>1,
+			'name'=>'Whole Body-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR006',
+			'type_id'=>1,
+			'name'=>'Brain MRA MRV-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR008',
+			'type_id'=>1,
+			'name'=>'Brain & sella-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR009',
+			'type_id'=>1,
+			'name'=>'Perinatal fistula-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR010',
+			'type_id'=>1,
+			'name'=>'Knee-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR011',
+			'type_id'=>1,
+			'name'=>'Shoulder-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR012',
+			'type_id'=>1,
+			'name'=>'Abdomen-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR014',
+			'type_id'=>1,
+			'name'=>'Pelvis-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR015',
+			'type_id'=>1,
+			'name'=>'LSS-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR016',
+			'type_id'=>1,
+			'name'=>'DS-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR017',
+			'type_id'=>1,
+			'name'=>'CS-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR018',
+			'type_id'=>1,
+			'name'=>'MR-Total Spine',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR019',
+			'type_id'=>1,
+			'name'=>'Ankle-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR020',
+			'type_id'=>1,
+			'name'=>'Wrist-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'MR021',
+			'type_id'=>1,
+			'name'=>'Hip-MR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'CR001',
+			'type_id'=>1,
+			'name'=>'IVU-CR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'CR002',
+			'type_id'=>1,
+			'name'=>'Shoulder-CR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'CR003',
+			'type_id'=>1,
+			'name'=>'Hand-CR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'CR004',
+			'type_id'=>1,
+			'name'=>'Foot-CR',
+			'device_id'=>2
+		]);
+		Procedure::create([
+			'proc_ris_id'=>'CR005',
+			'type_id'=>1,
+			'name'=>'Ankle-CR',
+			'device_id'=>2
+		]);
+    }
+}
