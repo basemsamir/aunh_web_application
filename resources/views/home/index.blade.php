@@ -1,10 +1,11 @@
 @extends('layouts.app')
 
 @section('content')
-<div class="container" id="#d">
-    <div class="row" dir="rtl">
+<div class="container" >
+  <div class="row" dir="rtl">
 		@include('layouts.flash_message')
-		<div class="col-md-5">
+
+		<div class="col-md-4">
             <div class="panel panel-default">
                 <div class="panel-heading" > بيانات المرضي </div>
                 <div class="panel-body">
@@ -22,7 +23,7 @@
 									<tr>
 										<td>{{ $patient->id }}</td>
 										<td>{{ $patient->name }}</td>
-										<td align="center"><a nohref class="btn btn-info" 
+										<td align="center"><a nohref class="btn btn-info"
 											   onclick=""><i class="fa fa-edit"></i></a> </td>
 									</tr>
 								@endforeach
@@ -33,14 +34,16 @@
             </div>
         </div>
 		@yield('forms')
-		
-    </div>
+
+  </div>
 </div>
 @endsection
 @section('javascript')
 <script>
 $(document).ready(function(){
 
+  $("#device").prop("selectedIndex",0);
+  $("#procedure_name").prop("selectedIndex",0);
 	$("#datepicker").datepicker({
 		format:"yyyy-mm-dd",
 		startDate: '-100y',
@@ -49,7 +52,7 @@ $(document).ready(function(){
 	$('#device').change(function(){
 		if($('#device').val() != ""){
 			var url = "{{ url('ajax/getProcedures') }}";
-			
+
 			$.ajax({
 				type: "POST",
 				url: url,
@@ -67,10 +70,10 @@ $(document).ready(function(){
 					alert("Error");
 				}
 			});
-		
+
 		}
 	});
-	
+
 });
 
 // Function accepts numbers only
@@ -82,9 +85,15 @@ function isNumber(evt) {
     }
     return true;
 }
+// Function limits the size of SIN field
+function isForteen(event){
+	if(event.target.value.length >= 14)
+		return false;
+	return true;
+}
 var proc_device=Array();
 function addProcedure(){
-	
+
 	var row_id="row_"+$("#device option:selected").val()+"_"+$("#procedure_name option:selected").val();
 	var id=$("#device option:selected").val()+"_"+$("#procedure_name option:selected").val();
 	var flag=false;
@@ -110,11 +119,11 @@ function addProcedure(){
 				alert("Error");
 			}
 		});
-		
+
 	}
 }
 function delete_proc_device(device_id,proc_id){
-	
+
 	var url = "{{ url('ajax/deleteProcDevice') }}";
 
 	$.ajax({
@@ -129,8 +138,6 @@ function delete_proc_device(device_id,proc_id){
 		}
 	});
 }
-function submitForm(){
-	//$("#proc_device").val(proc_device);
-}
+
 </script>
 @stop

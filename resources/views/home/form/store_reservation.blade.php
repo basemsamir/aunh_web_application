@@ -2,19 +2,23 @@
 @section('forms')
 {!! Form::open(array('id'=>'patient_form','route'=>'ris.store')) !!}
 @include('home.rad')
-<div class="col-md-4">
+<div class="col-md-5">
 	<div class="panel panel-default" >
 		<div class="panel-heading">بيانات المريض</div>
 
 		<div class="panel-body " >
 			<div class="row ">
-				
+
 				<div class="col-md-6">
-				   <div class="form-group @if($errors->has('birthdate')) {{ 'has-error'}} @endif">
-					 {!! Form::label('تاريخ الميلاد',null,array('class'=>'required')) !!}
-					 {!! Form::text('birthdate',null,array('class'=>'form-control','id'=>'datepicker','placeholder'=>'1900-01-01')) !!}
-					  @if ($errors->has('birthdate'))<span class="help-block">{{ $errors->first('birthdate') }}</span>@endif
-				   </div>
+
+					 <div class="form-inline @if($errors->has('year_age')) has-error @endif">
+						 {!! Form::label('السن ( يوم / شهر / سنة )',null,array('style'=>'color:red')) !!} <br>
+						 {!! Form::select('day_age',$day_month[0],null,['class'=>'form-control age_style','id'=>'day_age']) !!}
+						 {!! Form::select('month_age',$day_month[1],null,['class'=>'form-control age_style','id'=>'month_age']); !!}
+						 {!! Form::text('year_age',null,array('placeholder'=>'عدد السنين','class'=>'form-control age_style','id'=>'year_age','onkeypress'=>'return isNumber(event)')) !!}
+						 @if($errors->has('year_age'))<span class="help-block">{{$errors->first('year_age')}}</span>@endif
+					 </div>
+					 <br>
 				   <div class="form-group @if($errors->has('address')) {{ 'has-error'}} @endif">
 					 {!! Form::label('العنوان',null) !!}
 					 {!! Form::text('address',null,array('class'=>'form-control','id'=>'address','placeholder'=>'العنوان')) !!}
@@ -30,7 +34,7 @@
 					 {!! Form::text('phone_number',null,array('class'=>'form-control','id'=>'phone_number','placeholder'=>'رقم التليفون','onkeypress'=>'return isNumber(event)')) !!}
 					  @if ($errors->has('phone_number'))<span class="help-block">{{ $errors->first('phone_number') }}</span>@endif
 				   </div>
-				</div> 
+				</div>
 				<!-- col-md-6 -->
 				<div class="col-md-6">
 				   <div class="form-group">
@@ -45,7 +49,7 @@
 				   </div>
 				   <div class="form-group @if($errors->has('sin')) {{ 'has-error'}} @endif">
 					 {!! Form::label('الرقم القومي',null) !!}
-					 {!! Form::text('sin',null,array('class'=>'form-control','id'=>'sin','placeholder'=>'الرقم القومي','onkeypress'=>'return isNumber(event)')) !!}
+					 {!! Form::text('sin',null,array('class'=>'form-control','id'=>'sin','placeholder'=>'الرقم القومي','onkeypress'=>'return isNumber(event)&&isForteen(event)')) !!}
 					  @if ($errors->has('sin'))<span class="help-block">{{ $errors->first('sin') }}</span>@endif
 				   </div>
 				   <div class="form-group @if($errors->has('gender')) {{ 'has-error'}} @endif">
@@ -53,19 +57,12 @@
 					 {!! Form::select('gender',[''=>'أختر النوع','M' => 'ذكر', 'F' => 'أنثى'], '',['class'=>'form-control','id'=>'gender_select']); !!}
 					  @if ($errors->has('gender'))<span class="help-block">{{ $errors->first('gender') }}</span>@endif
 				   </div>
-				   <div class="form-group @if($errors->has('age')) {{ 'has-error'}} @endif">
-					 {!! Form::label('السن',null) !!}
-					 {!! Form::text('age',null,array('class'=>'form-control','id'=>'age','placeholder'=>'السن','onkeypress'=>'return isNumber(event)')) !!}
-					  @if ($errors->has('age'))<span class="help-block">{{ $errors->first('age') }}</span>@endif
-					  {!! Form::hidden('proc_device',null,array('id'=>'proc_device')) !!}
-					 
-				   </div>
-				   <button type="submit" class="btn btn-primary" onclick="submitForm()">تسجيل</button>
+				   <button type="submit" class="btn btn-primary" >تسجيل</button>
 				   <input type="reset" class="btn btn-success" value="جديد" onclick="$('#err_msg').hide();$('.form input').removeAttr('disabled');$('#gender_select').removeAttr('disabled');
 					$('.alert').hide();" />
-				</div> 
+				</div>
 				<!-- col-md-6 -->
-				
+
 			</div>
 			<!-- row -->
 		</div>

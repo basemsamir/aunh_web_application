@@ -25,9 +25,12 @@
         .fa-btn {
             margin-right: 6px;
         }
-		.required{
-			color: red;
-		}
+    		.required{
+    			color: red;
+    		}
+        .age_style{
+          width: 32% !important;
+        }
     </style>
 </head>
 <body id="app-layout">
@@ -108,7 +111,7 @@
 		$('#patient_tb').DataTable({
             "processing": true,
             "serverSide": true,
-			"lengthMenu": [10],
+			      "lengthMenu": [10],
             "ajax":{
                      "url": "{{ url('ajax/getPatientsToday') }}",
                      "dataType": "json",
@@ -119,6 +122,9 @@
                 { "data": "id" },
                 { "data": "name" },
                 { "data": "options" },
+            ],
+            "columnDefs": [
+                { "targets": [2], "searchable": false, "orderable": false, "visible": true }
             ]
 
         });

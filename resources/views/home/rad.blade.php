@@ -1,7 +1,7 @@
 <div class="col-md-3">
 	<div class="panel panel-default">
 		<div class="panel-heading">بيانات الأشعة</div>
-		
+
 		<div class="panel-body">
 			@if($errors->has('proc_device'))
 			<div class="alert alert-danger">
@@ -21,9 +21,9 @@
 				{!! Form::select('procedure',$device_procedures,null,['id'=>'procedure_name','class'=>'form-control','change'=>'changeDevice']) !!}
 			</div>
 			<button type="button" class="btn btn-primary" onclick="addProcedure()" >إضافة</button>
-				   
+
 		</div>
-		
+
 	</div>
 	<div class="panel panel-default">
 		<div class="panel-heading">الأشعة التي تم حجزها</div>
@@ -37,18 +37,18 @@
 				</tr>
 				</thead>
 				<tbody>
-				
+
 					@if(Session::has('proc_devices'))
-					
+
 					<?php $dev_procs=Session::get('proc_devices'); ?>
 						@foreach($dev_procs as $row)
 							@foreach($row as $row1)
 							<tr id="row_{{ $row1[1][0] }}_{{ $row1[0][0] }}">
 								<td> {{ $row1[1][1] }} </td>
 								<td> {{ $row1[0][1] }} </td>
-								<td> 
-									<a nohref class="btn btn-danger" 
-									   onclick="delete_proc_device({{ $row1[1][0] }},{{ $row1[0][0] }})"><i class="fa fa-close"></i></a> 
+								<td>
+									<a nohref class="btn btn-danger"
+									   onclick="delete_proc_device({{ $row1[1][0] }},{{ $row1[0][0] }})"><i class="fa fa-close"></i></a>
 								</td>
 							</tr>
 							@endforeach
@@ -57,6 +57,6 @@
 				</tbody>
 			</table>
 		</div>
-		
+
 	</div>
 </div>

@@ -8,7 +8,7 @@
 
 		<div class="panel-body " >
 			<div class="row ">
-				
+
 				<div class="col-md-6">
 				   <div class="form-group @if($errors->has('birthdate')) {{ 'has-error'}} @endif">
 					 {!! Form::label('تاريخ الميلاد',null,array('class'=>'required')) !!}
@@ -30,7 +30,7 @@
 					 {!! Form::text('phone_number',null,array('class'=>'form-control','id'=>'phone_number','placeholder'=>'رقم التليفون','onkeypress'=>'return isNumber(event)')) !!}
 					  @if ($errors->has('phone_number'))<span class="help-block">{{ $errors->first('phone_number') }}</span>@endif
 				   </div>
-				</div> 
+				</div>
 				<!-- col-md-6 -->
 				<div class="col-md-6">
 				   <div class="form-group">
@@ -45,7 +45,7 @@
 				   </div>
 				   <div class="form-group @if($errors->has('sin')) {{ 'has-error'}} @endif">
 					 {!! Form::label('الرقم القومي',null) !!}
-					 {!! Form::text('sin',null,array('class'=>'form-control','id'=>'sin','placeholder'=>'الرقم القومي','onkeypress'=>'return isNumber(event)')) !!}
+					 {!! Form::text('sin',null,array('class'=>'form-control','id'=>'sin','placeholder'=>'الرقم القومي','onkeypress'=>'return isNumber(event)&&isForteen()')) !!}
 					  @if ($errors->has('sin'))<span class="help-block">{{ $errors->first('sin') }}</span>@endif
 				   </div>
 				   <div class="form-group @if($errors->has('gender')) {{ 'has-error'}} @endif">
@@ -58,13 +58,13 @@
 					 {!! Form::text('age',null,array('class'=>'form-control','id'=>'age','placeholder'=>'السن','onkeypress'=>'return isNumber(event)')) !!}
 					  @if ($errors->has('age'))<span class="help-block">{{ $errors->first('age') }}</span>@endif
 					  {!! Form::hidden('proc_device',null,array('id'=>'proc_device')) !!}
-					 
+
 				   </div>
 				   <button type="submit" class="btn btn-primary" onclick="submitForm()">تعديل</button>
 
-				</div> 
+				</div>
 				<!-- col-md-6 -->
-				
+
 			</div>
 			<!-- row -->
 		</div>
