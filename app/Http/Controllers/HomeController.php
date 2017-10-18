@@ -127,7 +127,7 @@ class HomeController extends Controller
 		}
 
 		public function edit($vid)
-	    {
+	  {
 			Session::forget('proc_devices');
 	        $visit = Visit::find($vid);
 			$orders= $visit->orders;
@@ -146,8 +146,9 @@ class HomeController extends Controller
 			foreach($rs_places as $rs_place)
 				$rs_places_list[$rs_place->id]=$rs_place->name;
 			//$medical_proc_devices= $visit->orders;
-	        return view('home.form.edit_reservation',compact('patient','visit','devices','rs_places_list','device_procedures','orders'));
-	    }
+			$day_month=$this->day_month_array();
+	    return view('home.form.edit_reservation',compact('patient','visit','devices','rs_places_list','device_procedures','orders','day_month'));
+	  }
 		public function update(ReservationRequest $request,$vid)
 	    {
 			$input=$request->all();
@@ -157,7 +158,8 @@ class HomeController extends Controller
 			try{
 				$visit=Visit::find($vid);
 				$proc_devices=Session::get('proc_devices');
-				$patient=Patient::find($visit->patient_id)->update($request->all());
+				$input['birthdate']=$this->getBirthday($input['day_age'],$input['month_age'],$input['year_age']);
+				$patient=Patient::find($visit->patient_id)->update($input);
 				$visit->update(array('entry_id'=>$input['rs_place']));
 				//dd($proc_devices);
 
@@ -165,7 +167,7 @@ class HomeController extends Controller
 				$orders=$visit->orders;
 				foreach($orders as $order){
 					$m_order_item=MedicalOrderItem::find($order->id);
-					$this->sendingData($visit,$m_order_item,'cancel');
+					//$this->sendingData($visit,$m_order_item,'cancel');
 					$m_order_item->delete();
 
 				}

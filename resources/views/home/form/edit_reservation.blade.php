@@ -2,7 +2,7 @@
 @section('forms')
 {!! Form::model($patient,['method'=>'PATCH','id'=>'patient_form','route'=>['ris.update',$visit->id]]) !!}
 @include('home.rad')
-<div class="col-md-4">
+<div class="col-md-5">
 	<div class="panel panel-default" >
 		<div class="panel-heading">بيانات المريض</div>
 
@@ -10,11 +10,17 @@
 			<div class="row ">
 
 				<div class="col-md-6">
-				   <div class="form-group @if($errors->has('birthdate')) {{ 'has-error'}} @endif">
-					 {!! Form::label('تاريخ الميلاد',null,array('class'=>'required')) !!}
-					 {!! Form::text('birthdate',null,array('class'=>'form-control','id'=>'datepicker','placeholder'=>'1900-01-01')) !!}
-					  @if ($errors->has('birthdate'))<span class="help-block">{{ $errors->first('birthdate') }}</span>@endif
-				   </div>
+					 <div class="form-inline @if($errors->has('year_age')) has-error @endif">
+						{!! Form::label('السن ( يوم / شهر / سنة )',null,array('style'=>'color:red')) !!} <br>
+						<?php $year=Carbon\Carbon::parse($patient->birthdate)->diff(Carbon\Carbon::now())->format('%y'); ?>
+						<?php $month=Carbon\Carbon::parse($patient->birthdate)->diff(Carbon\Carbon::now())->format('%m'); ?>
+						<?php $day=Carbon\Carbon::parse($patient->birthdate)->diff(Carbon\Carbon::now())->format('%d'); ?>
+						{!! Form::select('day_age',$day_month[0],$day,['class'=>'form-control age_style','id'=>'day_age']) !!}
+						{!! Form::select('month_age',$day_month[1],$month,['class'=>'form-control age_style','id'=>'month_age']); !!}
+						{!! Form::text('year_age', $year,array('placeholder'=>'عدد السنين','class'=>'form-control age_style','id'=>'year_age','onkeypress'=>'return isNumber(event)')) !!}
+						@if($errors->has('year_age'))<span class="help-block">{{$errors->first('year_age')}}</span>@endif
+					 </div>
+					 <br>
 				   <div class="form-group @if($errors->has('address')) {{ 'has-error'}} @endif">
 					 {!! Form::label('العنوان',null) !!}
 					 {!! Form::text('address',null,array('class'=>'form-control','id'=>'address','placeholder'=>'العنوان')) !!}
@@ -52,13 +58,6 @@
 					 {!! Form::label('النوع',null,array('class'=>'required')) !!}
 					 {!! Form::select('gender',[''=>'أختر النوع','M' => 'ذكر', 'F' => 'أنثى'], $patient->gender,['class'=>'form-control','id'=>'gender_select']); !!}
 					  @if ($errors->has('gender'))<span class="help-block">{{ $errors->first('gender') }}</span>@endif
-				   </div>
-				   <div class="form-group @if($errors->has('age')) {{ 'has-error'}} @endif">
-					 {!! Form::label('السن',null) !!}
-					 {!! Form::text('age',null,array('class'=>'form-control','id'=>'age','placeholder'=>'السن','onkeypress'=>'return isNumber(event)')) !!}
-					  @if ($errors->has('age'))<span class="help-block">{{ $errors->first('age') }}</span>@endif
-					  {!! Form::hidden('proc_device',null,array('id'=>'proc_device')) !!}
-
 				   </div>
 				   <button type="submit" class="btn btn-primary" onclick="submitForm()">تعديل</button>
 
