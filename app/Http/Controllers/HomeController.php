@@ -92,7 +92,6 @@ class HomeController extends Controller
 			DB::beginTransaction();
 			try{
 				$proc_devices=Session::get('proc_devices');
-				$input['birthdate']=$this->getBirthday($input['day_age'],$input['month_age'],$input['year_age']);
 				$patient=Patient::create($input);
 				//dd($proc_devices);
 				$visit=Visit::create([
@@ -110,6 +109,8 @@ class HomeController extends Controller
 						$m_order_item=MedicalOrderItem::create([
 							'visit_id'=>$visit->id,
 							'medical_device_procedure_id'=>$medical_device_procedure->pivot->id,
+							'procedure_status'=>$row1[2][1],
+							'procedure_date'=>$row1[2][0],
 							'user_id'=>$this->user->id
 						]);
 						//$this->sendingData($visit,$m_order_item);
@@ -199,8 +200,10 @@ class HomeController extends Controller
 		public function ajaxStoreDeviceProc(){
 			if(request()->ajax()){
 				$proc_device=request()->input('proc_device');
+				$proc_date=request()->input('proc_date');
+				$proc_status=request()->input('proc_status');
 				if($proc_device != "")
-					Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device));
+					Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device,$proc_date,$proc_status));
 				return response()->json(['success' => 'true']);
 			}
 			else{

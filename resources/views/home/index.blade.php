@@ -5,36 +5,38 @@
   <div class="row" dir="rtl">
 		@include('layouts.flash_message')
 
-		<div class="col-md-4">
-            <div class="panel panel-default">
-                <div class="panel-heading" > بيانات المرضي </div>
-                <div class="panel-body">
-                    <table id="patient_tb" class="table table-bordered">
-						<thead >
-						<tr>
-						  <th style="text-align:center">الكود</th>
-						  <th style="text-align:center">الأسم</th>
-						  <th style="text-align:center">تحديد</th>
-						</tr>
-						</thead>
-						<tbody>
-							@if(isset($patients))
-								@foreach($patients as $patient)
-									<tr>
-										<td>{{ $patient->id }}</td>
-										<td>{{ $patient->name }}</td>
-										<td align="center"><a nohref class="btn btn-info"
-											   onclick=""><i class="fa fa-edit"></i></a> </td>
-									</tr>
-								@endforeach
-							@endif
-						</tbody>
-					</table>
-                </div>
-            </div>
-        </div>
 		@yield('forms')
 
+  </div>
+  <div class="row">
+		<div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading" > بيانات المرضي </div>
+            <div class="panel-body">
+                <table id="patient_tb" class="table table-bordered">
+          				<thead >
+          				<tr>
+          				  <th style="text-align:center">الكود</th>
+          				  <th style="text-align:center">الأسم</th>
+          				  <th style="text-align:center">تحديد</th>
+          				</tr>
+          				</thead>
+          				<tbody>
+          					@if(isset($patients))
+          						@foreach($patients as $patient)
+          							<tr>
+          								<td>{{ $patient->id }}</td>
+          								<td>{{ $patient->name }}</td>
+          								<td align="center"><a nohref class="btn btn-info"
+          									   onclick=""><i class="fa fa-edit"></i></a> </td>
+          							</tr>
+          						@endforeach
+          					@endif
+          				</tbody>
+			          </table>
+            </div>
+        </div>
+    </div>
   </div>
 </div>
 @endsection
@@ -42,13 +44,23 @@
 <script>
 $(document).ready(function(){
 
+  var today=new Date();
   $("#device").prop("selectedIndex",0);
   $("#procedure_name").prop("selectedIndex",0);
+  $("#procedure_status").prop("selectedIndex",0);
+
 	$("#datepicker").datepicker({
 		format:"yyyy-mm-dd",
 		startDate: '-100y',
 		endDate: '+0d'
 	});
+
+  $("#datepicker2").datepicker({
+		format:"yyyy-mm-dd",
+		startDate: '+0d',
+    todayHighlight: true
+	});
+  $("#datepicker2").val(today.getFullYear()+"-"+ (today.getMonth()+1) +"-"+today.getDate());
 	$('#device').change(function(){
 		if($('#device').val() != ""){
 			var url = "{{ url('ajax/getProcedures') }}";
@@ -73,6 +85,47 @@ $(document).ready(function(){
 
 		}
 	});
+  $('#year_age').keyup(function(){
+      if($('#year_age').val() != ""){
+
+          birthdate_year=today.getFullYear()-$('#year_age').val();
+          $("#datepicker").val(birthdate_year+"-"+(today.getMonth()+1)+"-"+today.getDate());
+      }
+      else{
+        $("#datepicker").val("");
+      }
+  });
+  $('#datepicker').change(function(){
+      if($('#datepicker').val() != ""){
+          birthdate=new Date($('#datepicker').val());
+          diffYears = today.getFullYear() - birthdate.getFullYear();
+          diffMonths = today.getMonth() - birthdate.getMonth();
+          diffDays = today.getDate() - birthdate.getDate();
+          if(isNaN(diffDays)){
+            $("#year_age").val('');
+            $("#datepicker").val('');
+            return;
+          }
+          if(diffDays < 0){
+            diffMonths--;
+            diffDays+=30;
+          }
+          if(isNaN(diffMonths)){
+            $("#age").val('');
+            $("#datepicker").val('');
+            return;
+          }
+          if(diffMonths < 0){
+            diffMonths+=12;
+            diffYears--;
+          }
+          $("#year_age").val(diffYears);
+      }
+      else{
+        $("#year_age").val("");
+      }
+  });
+
 
 });
 
@@ -107,7 +160,12 @@ function addProcedure(){
 		$.ajax({
 			type: "POST",
 			url: url,
-			data:{proc_device:$("#device").val()+"_"+$("#procedure_name").val(),_token:"<?php echo csrf_token(); ?>" },
+			data:{
+        proc_device:$("#device").val()+"_"+$("#procedure_name").val(),
+        proc_date:$("#datepicker2").val(),
+        proc_status:$("#procedure_status").val() ,
+        _token:"<?php echo csrf_token(); ?>"
+      },
 			success: function (data) {
 				$("#proc_device_tb").append('<tr id='+row_id+'>'+
 											'<td>'+$("#device option:selected").text()+'</td>'+

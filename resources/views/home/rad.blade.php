@@ -1,28 +1,49 @@
-<div class="col-md-3">
+<div class="col-md-6">
 	<div class="panel panel-default">
 		<div class="panel-heading">بيانات الأشعة</div>
 
 		<div class="panel-body">
-			@if($errors->has('proc_device'))
-			<div class="alert alert-danger">
-				{{ $errors->first('proc_device') }}
-			</div>
-			@endif
-			<div class="form-group">
-				{!! Form::label('مكان الحجز',null) !!}
-				{!! Form::select('rs_place',$rs_places_list,null,['id'=>'rs_place','class' => 'form-control']); !!}
-			</div>
-			<div class="form-group">
-				{!! Form::label('أسم الجهاز',null,array('class'=>'required')) !!}
-				{!! Form::select('device',$devices,null,['id'=>'device','class' => 'form-control']); !!}
-			</div>
-			<div class="form-group" >
-				{!! Form::label('نوع الفحص',null,array('class'=>'required')) !!}
-				{!! Form::select('procedure',$device_procedures,null,['id'=>'procedure_name','class'=>'form-control','change'=>'changeDevice']) !!}
-			</div>
-			<button type="button" class="btn btn-primary" onclick="addProcedure()" >إضافة</button>
+				<div class="row ">
+						@if($errors->has('proc_device'))
+						<div class="alert alert-danger">
+							{{ $errors->first('proc_device') }}
+						</div>
+						@endif
+						<div class="col-lg-6">
+							<div class="form-group">
+								{!! Form::label('مكان الحجز',null) !!}
+								{!! Form::select('rs_place',$rs_places_list,null,['id'=>'rs_place','class' => 'form-control']); !!}
+							</div>
+							<div class="form-group">
+								{!! Form::label('أسم الجهاز',null,array('class'=>'required')) !!}
+								{!! Form::select('device',$devices,null,['id'=>'device','class' => 'form-control']); !!}
+							</div>
+							<div class="form-group" >
+								{!! Form::label('نوع الفحص',null,array('class'=>'required')) !!}
+								{!! Form::select('procedure',$device_procedures,null,['id'=>'procedure_name','class'=>'form-control','change'=>'changeDevice']) !!}
+							</div>
+						</div>
+						<div class="col-lg-6">
 
-		</div>
+							<div class="form-group" >
+								{!! Form::label('حالة الفحص',null,array('class'=>'required')) !!}
+								{!! Form::select('procedure_status',['Arriving'=>'Arriving','Schedular'=>'Schedular'],'Arriving',['id'=>'procedure_status','class'=>'form-control']) !!}
+							</div>
+							<div class="form-group" >
+								{!! Form::label('تاريخ الفحص',null,array('class'=>'required')) !!}
+								{!! Form::text('procedure_date',null,array('class'=>'form-control','id'=>'datepicker2','placeholder'=>'1900-01-01')) !!}
+							</div>
+							<div class="form-group" >
+								{!! Form::label('القسم',null,array('class'=>'required')) !!}
+								{!! Form::select('department',$device_procedures,null,['id'=>'department','class'=>'form-control']) !!}
+							</div>
+							<div class="form-group" >
+								{!! Form::label('طبيب الأشعة',null,array('class'=>'required')) !!}
+								{!! Form::select('xray_doctor',$device_procedures,null,['id'=>'xray_doctor','class'=>'form-control']) !!}
+							</div>
+							<button type="button" class="btn btn-primary" onclick="addProcedure()" >إضافة</button>
+						</div>
+				</div>
 
 	</div>
 	<div class="panel panel-default">
@@ -59,4 +80,5 @@
 		</div>
 
 	</div>
+</div>
 </div>

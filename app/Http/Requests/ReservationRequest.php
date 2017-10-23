@@ -35,16 +35,9 @@ class ReservationRequest extends Request
 					'address'=>'min:3',
 					'nationality'=>'min:3',
 					'phone_number'=>'min:4|max:20',
-					'year_age' => 'numeric|required_without_all:month_age,day_age',
+					'birthdate' => 'required|date'
         ];
     }
 
-	public function messages()
-	{
-		return [
-			'year_age.numeric' => 'حقل عدد السنين يجب ان يكون رقم فقط.',
-			'year_age.required_without_all' =>'حقل عدد السنين يجب أن يكون أكبر من 0 فى حالة عدم وجود عدد أيام أو عدد أشهر',
-		];
-	}
 
 }
