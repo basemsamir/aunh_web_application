@@ -9,7 +9,7 @@
 
   </div>
   <div class="row">
-		<div class="col-md-12">
+		<div class="col-md-12" style="direction: rtl;">
         <div class="panel panel-default">
             <div class="panel-heading" > بيانات المرضي </div>
             <div class="panel-body">
@@ -18,20 +18,12 @@
           				<tr>
           				  <th style="text-align:center">الكود</th>
           				  <th style="text-align:center">الأسم</th>
+                    <th style="text-align:center">الرقم القومي</th>
           				  <th style="text-align:center">تحديد</th>
           				</tr>
           				</thead>
           				<tbody>
-          					@if(isset($patients))
-          						@foreach($patients as $patient)
-          							<tr>
-          								<td>{{ $patient->id }}</td>
-          								<td>{{ $patient->name }}</td>
-          								<td align="center"><a nohref class="btn btn-info"
-          									   onclick=""><i class="fa fa-edit"></i></a> </td>
-          							</tr>
-          						@endforeach
-          					@endif
+          					
           				</tbody>
 			          </table>
             </div>
@@ -163,13 +155,16 @@ function addProcedure(){
 			data:{
         proc_device:$("#device").val()+"_"+$("#procedure_name").val(),
         proc_date:$("#datepicker2").val(),
-        proc_status:$("#procedure_status").val() ,
+        proc_status:$("#procedure_status").val(),
+        proc_dep:$("#department").val(),
+        proc_doctor:$("#xray_doctor").val(),
         _token:"<?php echo csrf_token(); ?>"
       },
 			success: function (data) {
 				$("#proc_device_tb").append('<tr id='+row_id+'>'+
 											'<td>'+$("#device option:selected").text()+'</td>'+
 											'<td>'+$("#procedure_name option:selected").text()+'</td>'+
+                      '<td>'+$("#datepicker2").val()+'</td>'+
 											'<td>'+'<a nohref class="btn btn-danger" onclick="delete_proc_device('+$("#device option:selected").val()+","+$("#procedure_name option:selected").val()+')"><i class="fa fa-close"></i></a>'+'</td>'+
 										   '</tr>');
 			},

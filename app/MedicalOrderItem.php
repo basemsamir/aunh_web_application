@@ -20,4 +20,10 @@ class MedicalOrderItem extends Model
 	public function visit(){
 		return $this->belongsTo('App\Visit');
 	}
+	public function department(){
+		return $this->belongsTo('App\Department');
+	}
+	public function ref_doctor(){
+		return $this->belongsTo('App\Doctor','xray_doctor_id');
+	}
 }

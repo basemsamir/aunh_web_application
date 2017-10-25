@@ -11,6 +11,8 @@ use App\Procedure;
 use App\Patient;
 use App\Visit;
 use App\User;
+use App\Department;
+use App\Doctor;
 use App\MedicalDeviceProcedure;
 use App\Wsconfig;
 use App\HL7\msgHeader;
@@ -25,6 +27,7 @@ use App\HL7\cancelResponse;
 use App\HL7\Edit;
 use App\HL7\EditResponse;
 use Auth;
+use Carbon\Carbon;
 use DB;
 use Session;
 use Illuminate\Support\Facades\Lang;
@@ -62,7 +65,9 @@ class HomeController extends Controller
 				foreach($rs_places as $rs_place)
 					$rs_places_list[$rs_place->id]=$rs_place->name;
 				$day_month=$this->day_month_array();
-        return view('home.form.store_reservation',compact('devices','device_procedures','rs_places_list','patients','day_month'));
+				$departments=Department::lists('name','id');
+				$ref_doctors=Doctor::lists('name','id');
+        return view('home.form.store_reservation',compact('devices','device_procedures','rs_places_list','day_month','departments','ref_doctors'));
     }
 		private function day_month_array()
 		{
@@ -91,8 +96,11 @@ class HomeController extends Controller
 				return redirect()->back()->withErrors(array('proc_device'=>'لا يوجد فحوصات تمت حجزها'))->withInput();
 			DB::beginTransaction();
 			try{
+
 				$proc_devices=Session::get('proc_devices');
+				$input['sin']=$input['sin']==""?null:$input['sin'];
 				$patient=Patient::create($input);
+
 				//dd($proc_devices);
 				$visit=Visit::create([
 					'patient_id'=>$patient->id,
@@ -111,6 +119,8 @@ class HomeController extends Controller
 							'medical_device_procedure_id'=>$medical_device_procedure->pivot->id,
 							'procedure_status'=>$row1[2][1],
 							'procedure_date'=>$row1[2][0],
+							'department_id'=>$row1[2][2],
+							'xray_doctor_id'=>$row1[2][3],
 							'user_id'=>$this->user->id
 						]);
 						//$this->sendingData($visit,$m_order_item);
@@ -130,15 +140,21 @@ class HomeController extends Controller
 		public function edit($vid)
 	  {
 			Session::forget('proc_devices');
-	        $visit = Visit::find($vid);
-			$orders= $visit->orders;
+	    $visit = Visit::find($vid);
+			if($visit->created_at == Carbon::now()->format('Y-m-d'))
+				$orders= $visit->orders;
+			else{
+				$orders= $visit->orders()->whereDate('procedure_date','>',Carbon::now()->format('Y-m-d'))->get();
+			}
+
 			foreach($orders as $order){
 				$medical_device_procedure_id=$order->medical_device_procedure_id;
 				$proc_device=MedicalDeviceProcedure::find($medical_device_procedure_id);
 				$proc_device=$proc_device->medical_device_id."_".$proc_device->procedure_id;
-				Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device));
+				Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device,$order->procedure_date,$order->procedure_status,$order->department_id,$order->xray_doctor_id));
 			}
 			$patient= $visit->patient;
+			$age=Carbon::parse($patient->birthdate)->diffInYears(Carbon::now());
 			$devices= MedicalDevice::lists('name','id');
 			$first_device=MedicalDevice::first();
 			$device_procedures= $first_device->procedures()->lists('procedures.name','procedures.id');
@@ -148,10 +164,12 @@ class HomeController extends Controller
 				$rs_places_list[$rs_place->id]=$rs_place->name;
 			//$medical_proc_devices= $visit->orders;
 			$day_month=$this->day_month_array();
-	    return view('home.form.edit_reservation',compact('patient','visit','devices','rs_places_list','device_procedures','orders','day_month'));
+			$departments=Department::lists('name','id');
+			$ref_doctors=Doctor::lists('name','id');
+	    return view('home.form.edit_reservation',compact('age','patient','visit','devices','rs_places_list','device_procedures','orders','day_month','departments','ref_doctors'));
 	  }
 		public function update(ReservationRequest $request,$vid)
-	    {
+	  {
 			$input=$request->all();
 			if(count(Session::get('proc_devices')) == 0)
 				return redirect()->back()->withErrors(array('proc_device'=>'لا يوجد فحوصات تمت حجزها'));
@@ -159,7 +177,7 @@ class HomeController extends Controller
 			try{
 				$visit=Visit::find($vid);
 				$proc_devices=Session::get('proc_devices');
-				$input['birthdate']=$this->getBirthday($input['day_age'],$input['month_age'],$input['year_age']);
+				$input['sin']=$input['sin']==""?null:$input['sin'];
 				$patient=Patient::find($visit->patient_id)->update($input);
 				$visit->update(array('entry_id'=>$input['rs_place']));
 				//dd($proc_devices);
@@ -182,6 +200,10 @@ class HomeController extends Controller
 						$m_order_item=MedicalOrderItem::create([
 							'visit_id'=>$visit->id,
 							'medical_device_procedure_id'=>$medical_device_procedure->pivot->id,
+							'procedure_status'=>$row1[2][1],
+							'procedure_date'=>$row1[2][0],
+							'department_id'=>$row1[2][2],
+							'xray_doctor_id'=>$row1[2][3],
 							'user_id'=>$this->user->id
 						]);
 						//$this->sendingData($visit,$m_order_item);
@@ -202,8 +224,10 @@ class HomeController extends Controller
 				$proc_device=request()->input('proc_device');
 				$proc_date=request()->input('proc_date');
 				$proc_status=request()->input('proc_status');
+				$proc_dep=request()->input('proc_dep');
+				$proc_doc=request()->input('proc_doctor');
 				if($proc_device != "")
-					Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device,$proc_date,$proc_status));
+					Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device,$proc_date,$proc_status,$proc_dep,$proc_doc));
 				return response()->json(['success' => 'true']);
 			}
 			else{
@@ -237,7 +261,8 @@ class HomeController extends Controller
 				$columns = array(
 	                            0 =>'id',
 	                            1 =>'name',
-	                            2 =>'options',
+															2 =>'sin',
+	                            3 =>'options',
 	                        );
 
 				$totalData = Visit::join('patients','patients.id','=','visits.patient_id')->whereDate('visits.created_at','=',date('Y-m-d'))->count();
@@ -255,7 +280,7 @@ class HomeController extends Controller
 									 ->offset($start)
 									 ->limit($limit)
 									 ->orderBy($order,$dir)
-									 ->select('patients.id','name','visits.id as vid')
+									 ->select('patients.id','name','sin','visits.id as vid')
 									 ->whereDate('visits.created_at','=',date('Y-m-d'))
 									 ->get();
 				}
@@ -268,7 +293,7 @@ class HomeController extends Controller
 									->offset($start)
 									->limit($limit)
 									->orderBy($order,$dir)
-									->select('patients.id','name','visits.id as vid')
+									->select('patients.id','name','sin','visits.id as vid')
 
 									->get();
 
@@ -287,6 +312,7 @@ class HomeController extends Controller
 
 						$nestedData['id'] = $patient_visit->id;
 						$nestedData['name'] = $patient_visit->name;
+						$nestedData['sin'] = $patient_visit->sin;
 						$nestedData['options'] = "<a href='{$edit}' title='EDIT'  class='btn btn-info'  >
 												   <i class='fa fa-edit'></i></a>";
 						$data[] = $nestedData;

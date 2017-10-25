@@ -11,13 +11,14 @@ class Visit extends Model
 		'patient_id',
 		'entry_id',
 		'user_id',
-	
+
 	];
 	public function patient(){
 		return $this->belongsTo('App\Patient');
 	}
-	
+
 	public function orders(){
 		return $this->hasMany('App\MedicalOrderItem');
 	}
+
 }

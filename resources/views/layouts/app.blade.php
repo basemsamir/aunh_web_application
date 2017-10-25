@@ -121,10 +121,11 @@
             "columns": [
                 { "data": "id" },
                 { "data": "name" },
+                { "data": "sin" },
                 { "data": "options" },
             ],
             "columnDefs": [
-                { "targets": [2], "searchable": false, "orderable": false, "visible": true }
+                { "targets": [3], "searchable": false, "orderable": false, "visible": true }
             ]
 
         });
