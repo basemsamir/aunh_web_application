@@ -20,6 +20,9 @@ Route::post('ajax/postProcDevice','HomeController@ajaxStoreDeviceProc');
 Route::post('ajax/deleteProcDevice','HomeController@ajaxDeleteDeviceProc');
 Route::post('ajax/getPatientsToday','HomeController@ajaxGetAllPatientsToday');
 
+Route::get('patients', 'HomeController@search')->name('ris.patient_search');
+Route::post('patients', 'HomeController@post_search')->name('ris.post_search');
+
 Route::auth();
 
 //Login Routes...

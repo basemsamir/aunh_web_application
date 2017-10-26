@@ -23,9 +23,7 @@ use App\HL7\AUNHHL7ServiceService;
 use App\HL7\add;
 use App\HL7\addResponse;
 use App\HL7\cancel;
-use App\HL7\cancelResponse;
 use App\HL7\Edit;
-use App\HL7\EditResponse;
 use Auth;
 use Carbon\Carbon;
 use DB;
@@ -95,7 +93,7 @@ class HomeController extends Controller
 			if(count(Session::get('proc_devices')) == 0)
 				return redirect()->back()->withErrors(array('proc_device'=>'لا يوجد فحوصات تمت حجزها'))->withInput();
 			DB::beginTransaction();
-			try{
+		//	try{
 
 				$proc_devices=Session::get('proc_devices');
 				$input['sin']=$input['sin']==""?null:$input['sin'];
@@ -123,26 +121,28 @@ class HomeController extends Controller
 							'xray_doctor_id'=>$row1[2][3],
 							'user_id'=>$this->user->id
 						]);
-						//$this->sendingData($visit,$m_order_item);
+						$this->sendingData($visit,$m_order_item);
 
 					}
 				}
 				Session::forget('proc_devices');
 				DB::commit();
 				return redirect()->back()->withSuccessMessage(Lang::get('flash_messages.success'));
-			}
-			catch (\Exception $e){
-				DB::rollBack();
-				return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
-			}
+			// }
+			// catch (\Exception $e){
+				// DB::rollBack();
+				// return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
+			// }
 		}
 
 		public function edit($vid)
 	  {
 			Session::forget('proc_devices');
 	    $visit = Visit::find($vid);
-			if($visit->created_at == Carbon::now()->format('Y-m-d'))
+			if(Carbon::parse($visit->created_at)->format('Y-m-d') == Carbon::now()->format('Y-m-d')){
 				$orders= $visit->orders;
+			}
+
 			else{
 				$orders= $visit->orders()->whereDate('procedure_date','>',Carbon::now()->format('Y-m-d'))->get();
 			}
@@ -186,7 +186,7 @@ class HomeController extends Controller
 				$orders=$visit->orders;
 				foreach($orders as $order){
 					$m_order_item=MedicalOrderItem::find($order->id);
-					//$this->sendingData($visit,$m_order_item,'cancel');
+					$this->sendingData($visit,$m_order_item,'cancel');
 					$m_order_item->delete();
 
 				}
@@ -206,7 +206,7 @@ class HomeController extends Controller
 							'xray_doctor_id'=>$row1[2][3],
 							'user_id'=>$this->user->id
 						]);
-						//$this->sendingData($visit,$m_order_item);
+						$this->sendingData($visit,$m_order_item);
 
 					}
 				}
@@ -313,7 +313,7 @@ class HomeController extends Controller
 						$nestedData['id'] = $patient_visit->id;
 						$nestedData['name'] = $patient_visit->name;
 						$nestedData['sin'] = $patient_visit->sin;
-						$nestedData['options'] = "<a href='{$edit}' title='EDIT'  class='btn btn-info'  >
+						$nestedData['options'] = "<a href='{$edit}' title='تحديد'  class='btn btn-info'  >
 												   <i class='fa fa-edit'></i></a>";
 						$data[] = $nestedData;
 
@@ -332,6 +332,18 @@ class HomeController extends Controller
 			else{
 				return abort(404);
 			}
+		}
+		public function search($value='')
+		{
+				$orders=MedicalOrderItem::with('visit','visit.patient',
+																			 'medical_device_proc.device_order_item',
+																			 'medical_device_proc.proc_order_item',
+																			 'department',
+																			 'ref_doctor')
+															  ->whereDate('created_at','=',Carbon::now()->format('Y-m-d'))
+																->get();
+				//dd($orders);
+				return view('home.patients_table',compact('orders'));
 		}
 		private function sendingData($visit,$medical_order_item,$op='add'){
 
@@ -415,7 +427,6 @@ class HomeController extends Controller
 					$input->arg1=$orcOrderInfo;
 					$input->arg2=$patientInfo;
 					$input->arg3=$procedureInfo;
-					$response=new addResponse();
 					$response=$client->add($input);
 				break;
 				case 'cancel':
@@ -424,7 +435,6 @@ class HomeController extends Controller
 					$input->arg1=$orcOrderInfo;
 					$input->arg2=$patientInfo;
 					$input->arg3=$procedureInfo;
-					$response=new CancelResponse();
 					$response=$client->cancel($input);
 				break;
 				case 'edit':

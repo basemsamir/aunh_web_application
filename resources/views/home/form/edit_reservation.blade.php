@@ -54,10 +54,10 @@
 					 {!! Form::select('gender',[''=>'أختر النوع','M' => 'ذكر', 'F' => 'أنثى'], $patient->gender,['class'=>'form-control','id'=>'gender_select']); !!}
 					  @if ($errors->has('gender'))<span class="help-block">{{ $errors->first('gender') }}</span>@endif
 				   </div>
-					 <div class="form-group @if($errors->has('phone_number')) {{ 'has-error'}} @endif">
+					 <div class="form-group @if($errors->has('phone_num')) {{ 'has-error'}} @endif">
 					 {!! Form::label('رقم التليفون',null) !!}
-					 {!! Form::text('phone_number',null,array('class'=>'form-control','id'=>'phone_number','placeholder'=>'رقم التليفون','onkeypress'=>'return isNumber(event)')) !!}
-						@if ($errors->has('phone_number'))<span class="help-block">{{ $errors->first('phone_number') }}</span>@endif
+					 {!! Form::text('phone_num',null,array('class'=>'form-control','id'=>'phone_number','placeholder'=>'رقم التليفون','onkeypress'=>'return isNumber(event)')) !!}
+						@if ($errors->has('phone_num'))<span class="help-block">{{ $errors->first('phone_num') }}</span>@endif
 					 </div>
 				   <button type="submit" class="btn btn-primary" onclick="submitForm()">تعديل</button>
 

@@ -16,8 +16,8 @@ class WsconfigTableSeeder extends Seeder
 			'url' => 'http://172.16.0.118:2886/AUNHHL7?wsdl',
 			'sending_app' => 'AUNHHIS',
 			'sending_fac' => 'AUNH',
-			'receiving_app' => '',
-			'receiving_fac' => '',
+			'receiving_app' => 'PXBroker',
+			'receiving_fac' => 'Paxeramed',
 		]);
     }
 }

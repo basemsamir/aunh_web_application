@@ -2,7 +2,6 @@
 namespace App\HL7;
 use SoapClient;
 use App\HL7\add;
-use App\HL7\addResponse;
 use App\HL7\Edit;
 use App\HL7\EditResponse;
 use App\HL7\Cancel;
@@ -25,7 +24,6 @@ class AUNHHL7ServiceService extends SoapClient {
                                     'orcOrderInfo' => 'orcOrderInfo',
                                     'patientInfo' => 'patientInfo',
                                     'procedureInfo' => 'procedureInfo',
-                                    'addResponse' => 'addResponse',
                                     'Cancel' => 'Cancel',
                                     'cancelResponse' => 'cancelResponse',
                                     'Edit' => 'Edit',
