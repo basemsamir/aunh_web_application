@@ -14,7 +14,7 @@
 
 							<div class="form-group" >
 								{!! Form::label('تاريخ الفحص',null,array('class'=>'required')) !!}
-								{!! Form::text('procedure_date',null,array('class'=>'form-control','id'=>'datepicker2','placeholder'=>'1900-01-01')) !!}
+								{!! Form::text('procedure_date',null,array('class'=>'form-control','disabled'=>'disabled','id'=>'datepicker2','placeholder'=>'1900-01-01')) !!}
 							</div>
 
 							<div class="form-group" >
@@ -43,9 +43,9 @@
 							</div>
 							<div class="form-group" >
 								{!! Form::label('حالة الفحص',null,array('class'=>'required')) !!}
-								{!! Form::select('procedure_status',['Arriving'=>'Arriving','Schedular'=>'Schedular'],'Arriving',['id'=>'procedure_status','class'=>'form-control']) !!}
+								{!! Form::select('procedure_status',['Arriving'=>'اليوم','Schedular'=>'مجدولة'],'Arriving',['id'=>'procedure_status','class'=>'form-control']) !!}
 							</div>
-							<button type="button" class="btn btn-primary" onclick="addProcedure()" >إضافة</button>
+							<button type="button" class="btn btn-primary" onclick="addProcedure()" >إضافة الفحص</button>
 						</div>
 				</div>
 

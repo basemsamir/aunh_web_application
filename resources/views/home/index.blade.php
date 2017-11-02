@@ -58,7 +58,7 @@ $(document).ready(function(){
 		startDate: '+0d',
     todayHighlight: true
 	});
-  $("#datepicker2").val(today.getFullYear()+"-"+ (today.getMonth()+1) +"-"+today.getDate());
+  $("#datepicker2").datepicker('setDate',today);
 	$('#device').change(function(){
 		if($('#device').val() != ""){
 			var url = "{{ url('ajax/getProcedures') }}";
@@ -124,6 +124,19 @@ $(document).ready(function(){
       }
   });
 
+  $("#procedure_status").change(function(){
+    if($(this).val()!="Arriving"){
+      $("#datepicker2").removeAttr('disabled');
+      var current_date = $('#datepicker2').datepicker('getDate');
+      current_date.setDate(current_date.getDate()+1);
+      $("#datepicker2").datepicker('setDate',current_date);
+
+    }
+    else{
+        $("#datepicker2").attr('disabled','disabled');
+        $("#datepicker2").datepicker('setDate',today);
+    }
+  });
 
 });
 
@@ -153,6 +166,18 @@ function addProcedure(){
 			flag=true;
 	});
 	if(!flag){
+    if($("#datepicker2").val() == "")
+    {
+       today=new Date();
+       if($("#procedure_status").val() == "Arriving"){
+
+         $("#datepicker2").datepicker('setDate',today);
+       }
+       else{
+         today.setDate(today.getDate()+1);
+         $("#datepicker2").datepicker('setDate',today);
+       }
+    }
 		var url = "{{ url('ajax/postProcDevice') }}";
 
 		$.ajax({

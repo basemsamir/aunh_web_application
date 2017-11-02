@@ -226,9 +226,11 @@ class HomeController extends Controller
 				$proc_status=request()->input('proc_status');
 				$proc_dep=request()->input('proc_dep');
 				$proc_doc=request()->input('proc_doctor');
-				if($proc_device != "")
+				if($proc_device != "" && $proc_date!=""){
 					Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device,$proc_date,$proc_status,$proc_dep,$proc_doc));
-				return response()->json(['success' => 'true']);
+					return response()->json(['success' => 'true']);
+				}
+
 			}
 			else{
 				return abort(404);
@@ -342,8 +344,60 @@ class HomeController extends Controller
 																			 'ref_doctor')
 															  ->whereDate('created_at','=',Carbon::now()->format('Y-m-d'))
 																->get();
-				//dd($orders);
-				return view('home.patients_table',compact('orders'));
+
+				$devices= MedicalDevice::lists('name','id');
+				return view('home.patients_table',compact('orders','devices'));
+		}
+		public function post_search()
+		{
+			# code...
+			$input=request()->all();
+			$id=$input['pid'];
+			$orders=MedicalOrderItem::join('visits','visits.id','=','medical_order_items.visit_id')
+															->join('patients','patients.id','=','visits.patient_id')
+															->join('medical_device_procedure','medical_device_procedure.id','=','medical_order_items.medical_device_procedure_id')
+															->join('medical_devices','medical_devices.id','=','medical_device_procedure.medical_device_id')
+															->join('procedures','procedures.id','=','medical_device_procedure.procedure_id')
+															->where(function($query) use($input){
+
+																		switch ($input['date_selection']) {
+																			case 'today':
+																				$query->whereDate('medical_order_items.created_at','=',Carbon::now()->format('Y-m-d'));
+																				break;
+																			case 'yestarday':
+																				$query->whereDate('medical_order_items.created_at','=',Carbon::yesterday()->format('Y-m-d'));
+																				break;
+																			case 'last_week':
+																				$query->whereBetween('medical_order_items.created_at',[Carbon::now()->subWeek()->format('Y-m-d'),Carbon::now()->format('Y-m-d')]);
+																				break;
+																			case 'date_selected':
+																				if($input['duration_from']!="" && $input['duration_to'] !="")
+																					$query->whereBetween('medical_order_items.created_at',[$input['duration_from'],$input['duration_to']]);
+																				break;
+																			default:
+																				# code...
+																				break;
+																		}
+																})
+															->where(function($query) use($input)
+															{
+																# code...
+																	if($input['pid'] != "")
+																		$query->where('patients.id',$input['pid']);
+																	elseif($input['name'] != "")
+																		$query->where('patients.name','like',"%$input[name]%");
+
+																	if(isset($input['devices']) && count($input['devices']) > 0)
+																	{
+																		$query->whereIn('medical_devices.id',$input['devices']);
+																	}
+															})
+															->select('visits.id as vid','patients.id','patients.name','sin','birthdate','address','procedure_date','procedure_status'
+																			,'medical_devices.name as dev_name','procedures.name as proc_name')
+															->get();
+
+			$devices= MedicalDevice::lists('name','id');
+			return view('home.patients_table',compact('orders','devices'));
 		}
 		private function sendingData($visit,$medical_order_item,$op='add'){
 

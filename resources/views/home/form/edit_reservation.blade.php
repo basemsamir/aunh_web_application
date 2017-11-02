@@ -59,7 +59,7 @@
 					 {!! Form::text('phone_num',null,array('class'=>'form-control','id'=>'phone_number','placeholder'=>'رقم التليفون','onkeypress'=>'return isNumber(event)')) !!}
 						@if ($errors->has('phone_num'))<span class="help-block">{{ $errors->first('phone_num') }}</span>@endif
 					 </div>
-				   <button type="submit" class="btn btn-primary" onclick="submitForm()">تعديل</button>
+				   <button type="submit" class="btn btn-primary" onclick="submitForm()">إضافة و حفظ</button>
 
 				</div>
 				<!-- col-md-6 -->
