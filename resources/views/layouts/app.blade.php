@@ -46,15 +46,9 @@
                     <span class="icon-bar"></span>
                 </button>
 
-                <!-- Branding Image -->
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    AUNH
-                </a>
-                @if(Auth::check())
-                <a class="navbar-brand" href="{{ url('patients') }}">
-                    Patients
-                </a>
-                @endif
+                @yield('menu')
+
+
             </div>
 
             <div class="collapse navbar-collapse" id="app-navbar-collapse">
@@ -104,31 +98,7 @@
 	<!-- datepicker -->
 	<script src="{{asset('plugins/datepicker/bootstrap-datepicker.js')}}"></script>
 	<script src="{{asset('plugins/datatables/datatable.js')}}"></script>
-	<script>
-	$(document).ready(function(){
-		$('#patient_tb').DataTable({
-            "processing": true,
-            "serverSide": true,
-			      "lengthMenu": [10],
-            "ajax":{
-                     "url": "{{ url('ajax/getPatientsToday') }}",
-                     "dataType": "json",
-                     "type": "POST",
-                     "data":{ _token: "{{csrf_token()}}"}
-                   },
-            "columns": [
-                { "data": "id" },
-                { "data": "name" },
-                { "data": "sin" },
-                { "data": "options" },
-            ],
-            "columnDefs": [
-                { "targets": [3], "searchable": false, "orderable": false, "visible": true }
-            ]
-
-        });
-    });
-	</script>
+	
 	@yield('javascript')
 </body>
 </html>

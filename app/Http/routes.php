@@ -30,14 +30,18 @@ Route::get('/admin/login','AdminAuth\AuthController@showLoginForm');
 Route::post('/admin/login','AdminAuth\AuthController@login');
 Route::get('/admin/logout','AdminAuth\AuthController@logout');
 
-// Registration Routes...
-Route::get('admin/register', 'AdminAuth\AuthController@showRegistrationForm');
-Route::post('admin/register', 'AdminAuth\AuthController@register');
 
 Route::get('/admin', 'AdminController@index');
-
-
-
-
-
+Route::get('admin/reservation_place','AdminController@res_index');
+Route::get('admin/department','AdminController@dep_index');
+Route::get('admin/doctor','AdminController@doctor_index');
+Route::get('admin/medical_device','AdminController@medical_device_index');
+Route::get('admin/procedure','AdminController@procedure_index');
+Route::get('admin/user','AdminController@user_index');
+Route::resource('admin/reservation_place','ReservationPlacesController', array('except'=>['index','show']));
+Route::resource('admin/department','DepartmentsController', array('except'=>['index','show']));
+Route::resource('admin/doctor','DoctorsController', array('except'=>['index','show']));
+Route::resource('admin/medical_device','MedicalDevicesController', array('except'=>['index','show']));
+Route::resource('admin/procedure','ProceduresController', array('except'=>['index','show']));
+Route::resource('admin/user','UsersController', array('except'=>['index','show']));
 //Route::get('/home', 'HomeController@index');

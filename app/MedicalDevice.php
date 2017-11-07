@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class MedicalDevice extends Model
 {
     //
+	protected $fillable=['name','location'];
 	public function procedures(){
 
 		return $this->belongsToMany('App\Procedure')->withPivot('id')->withTimestamps();

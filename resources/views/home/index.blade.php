@@ -1,5 +1,9 @@
 @extends('layouts.app')
 
+@section('menu')
+  @include('layouts.home.menu')
+@stop
+
 @section('content')
 <div class="container" >
   <div class="row" dir="rtl">
@@ -41,6 +45,28 @@ $(document).ajaxComplete(function(){
     $("#overlay").hide();
 });
 $(document).ready(function(){
+
+  $('#patient_tb').DataTable({
+          "processing": true,
+          "serverSide": true,
+          "lengthMenu": [10],
+          "ajax":{
+                   "url": "{{ url('ajax/getPatientsToday') }}",
+                   "dataType": "json",
+                   "type": "POST",
+                   "data":{ _token: "{{csrf_token()}}"}
+                 },
+          "columns": [
+              { "data": "id" },
+              { "data": "name" },
+              { "data": "sin" },
+              { "data": "options" },
+          ],
+          "columnDefs": [
+              { "targets": [3], "searchable": false, "orderable": false, "visible": true }
+          ]
+
+      });
 
   var today=new Date();
   $("#device").prop("selectedIndex",0);

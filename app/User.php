@@ -23,8 +23,13 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
-	
+
 	public function reservation_places(){
 		return $this->belongsToMany('App\ReservationPlace')->withTimestamps();
 	}
+
+  public function visits()
+  {
+    return $this->hasMany('App\Visit');
+  }
 }

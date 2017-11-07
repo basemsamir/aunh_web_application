@@ -7,10 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 class Procedure extends Model
 {
     //
-
+  protected $fillable=['name','proc_ris_id','type_id'];
 	public function proceduretype(){
 
-		return $this->belongsTo('App\ProcedureType');
+		return $this->belongsTo('App\ProcedureType','type_id');
 	}
 	public function devices(){
 
