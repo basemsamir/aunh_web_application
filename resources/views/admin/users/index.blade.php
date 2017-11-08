@@ -25,16 +25,16 @@
             				</tr>
             				</thead>
             				<tbody>
-                      @foreach($users as $proc)
+                      @foreach($users as $user)
                       <tr>
-                        <td>{{ $proc->id }}</td>
-                        <td>{{  $proc->name }}</td>
-                        <td>{{  $proc->email }}</td>
-                        <td><a href='{{ url("admin/user/{$proc->id}/edit") }}' title='تعديل'  class='btn btn-info'  >
+                        <td>{{ $user->id }}</td>
+                        <td>{{  $user->name }}</td>
+                        <td>{{  $user->email }}</td>
+                        <td><a href='{{ url("admin/user/{$user->id}/edit") }}' title='تعديل'  class='btn btn-info'  >
                               <i class='fa fa-edit'></i></a>
                         </td>
                         <td>
-                        {!! Form::open(['url'=>"admin/user/{$proc->id}",'method'=>'delete']) !!}
+                        {!! Form::open(['url'=>"admin/user/{$user->id}",'method'=>'delete']) !!}
                             <button type="submit" class="btn btn-danger"><i class='fa fa-close'></i>
                             </button>
                         {!! Form::close() !!}

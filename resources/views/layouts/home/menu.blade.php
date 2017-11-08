@@ -1,10 +1,5 @@
-<!-- Branding Image -->
-<a class="navbar-brand" href="{{ url('/') }}">
-    AUNH
-</a>
 @if(Auth::check())
-<a class="navbar-brand" href="{{ url('patients') }}">
-    Patients
-</a>
+<ul class="nav navbar-nav">
+    <li><a href="{{ url('patients') }}">Patients</a></li>
+</ul>
 @endif
-

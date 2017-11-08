@@ -17,9 +17,9 @@ class AdminController extends Controller
     //
 
 	public function __construct()
-    {
-        $this->middleware('admin');
-    }
+  {
+      $this->middleware('admin');
+  }
 
 	public function index(){
 		return view('admin.index');
@@ -61,5 +61,12 @@ class AdminController extends Controller
 		$users=User::all();
 		$panel_title='بيانات المستخدمين';
 		return view('admin.users.index', compact('users','panel_title') );
+	}
+	public function res_user_index()
+	{
+		$res_users=ReservationPlace::all();
+
+		$panel_title='بيانات مستخدمين مكاتب الحجز';
+		return view('admin.users.res_user_index', compact('res_users','panel_title') );
 	}
 }

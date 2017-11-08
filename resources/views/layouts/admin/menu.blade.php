@@ -1,24 +1,12 @@
-<!-- Branding Image -->
-<a class="navbar-brand" href="{{ url('/admin') }}">
-    AUNH
-</a>
+
 @if(Auth::guard('admin')->check())
-<a class="navbar-brand" href="{{ url('admin/reservation_place') }}">
-    Reservation places
-</a>
-<a class="navbar-brand" href="{{ url('admin/department') }}">
-    Departments
-</a>
-<a class="navbar-brand" href="{{ url('admin/doctor') }}">
-    Doctors
-</a>
-<a class="navbar-brand" href="{{ url('admin/medical_device') }}">
-    Medical Devices
-</a>
-<a class="navbar-brand" href="{{ url('admin/procedure') }}">
-    Procedures
-</a>
-<a class="navbar-brand" href="{{ url('admin/user') }}">
-    Users
-</a>
+<ul class="nav navbar-nav">
+    <li><a href="{{ url('admin/reservation_place') }}">Reservation places</a></li>
+    <li><a href="{{ url('admin/department') }}">Departments</a></li>
+    <li><a href="{{ url('admin/doctor') }}">Doctors</a></li>
+    <li><a href="{{ url('admin/medical_device') }}">Medical Devices</a></li>
+    <li><a href="{{ url('admin/procedure') }}">Procedures</a></li>
+    <li><a href="{{ url('admin/user') }}">Users</a></li>
+    <li><a href="{{ url('admin/reservation_user') }}">Reservation place users</a></li>
+</ul>
 @endif
