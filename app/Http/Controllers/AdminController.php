@@ -65,8 +65,13 @@ class AdminController extends Controller
 	public function res_user_index()
 	{
 		$res_users=ReservationPlace::all();
-
 		$panel_title='بيانات مستخدمين مكاتب الحجز';
 		return view('admin.users.res_user_index', compact('res_users','panel_title') );
+	}
+	public function device_proc_index()
+	{
+		$device_procs=MedicalDevice::all();
+  	$panel_title='بيانات فحوصات أجهزة الأشعة';
+		return view('admin.procedures.device_proc_index', compact('device_procs','panel_title') );
 	}
 }

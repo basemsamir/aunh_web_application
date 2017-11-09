@@ -40,6 +40,7 @@ Route::get('admin/medical_device','AdminController@medical_device_index');
 Route::get('admin/procedure','AdminController@procedure_index');
 Route::get('admin/user','AdminController@user_index');
 Route::get('admin/reservation_user','AdminController@res_user_index');
+Route::get('admin/device_proc','AdminController@device_proc_index');
 Route::resource('admin/reservation_place','ReservationPlacesController', array('except'=>['index','show']));
 Route::resource('admin/department','DepartmentsController', array('except'=>['index','show']));
 Route::resource('admin/doctor','DoctorsController', array('except'=>['index','show']));
@@ -47,4 +48,5 @@ Route::resource('admin/medical_device','MedicalDevicesController', array('except
 Route::resource('admin/procedure','ProceduresController', array('except'=>['index','show']));
 Route::resource('admin/user','UsersController', array('except'=>['index','show']));
 Route::resource('admin/reservation_user','ReservationPlaceUsersController', array('except'=>['index','show','update','edit']));
+Route::resource('admin/device_proc','MedicalDeviceProceduresController', array('except'=>['index','show','update','edit']));
 //Route::get('/home', 'HomeController@index');
