@@ -21,7 +21,8 @@ class DoctorsController extends Controller
     {
         //
         $panel_title='بيانات أطباء الأشعة';
-        return view($this->base_folder_name.'.store',compact('panel_title'));
+        $doc_active='true';
+        return view($this->base_folder_name.'.store',compact('panel_title','doc_active'));
     }
 
     /**
@@ -52,8 +53,9 @@ class DoctorsController extends Controller
     {
         //
         $panel_title='بيانات أطباء الأشعة';
+        $doc_active='true';
         $doc=Doctor::find($id);
-        return view($this->base_folder_name.'.edit',compact('doc','panel_title'));
+        return view($this->base_folder_name.'.edit',compact('doc','panel_title','doc_active'));
     }
 
     /**

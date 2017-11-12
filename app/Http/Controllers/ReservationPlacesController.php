@@ -20,7 +20,8 @@ class ReservationPlacesController extends Controller
     {
         //
         $panel_title='بيانات أماكن الحجز';
-        return view($this->base_folder_name.'.store',compact('panel_title'));
+        $res_active='true';
+        return view($this->base_folder_name.'.store',compact('panel_title','res_active'));
     }
 
     /**
@@ -52,7 +53,8 @@ class ReservationPlacesController extends Controller
         //
         $place=ReservationPlace::find($id);
         $panel_title='بيانات أماكن الحجز';
-        return view($this->base_folder_name.'.edit',compact('place','panel_title'));
+        $res_active='true';
+        return view($this->base_folder_name.'.edit',compact('place','panel_title','res_active'));
     }
 
     /**

@@ -21,7 +21,8 @@ class UsersController extends Controller
    {
        //
        $panel_title='بيانات المستخدمين';
-       return view($this->base_folder_name.'.store',compact('panel_title'));
+       $user_active='true';
+       return view($this->base_folder_name.'.store',compact('panel_title','user_active'));
    }
 
    /**
@@ -60,8 +61,9 @@ class UsersController extends Controller
    {
        //
        $panel_title='بيانات المستخدمين';
+       $user_active='true';
        $user=User::find($id);
-       return view($this->base_folder_name.'.edit',compact('user','panel_title'));
+       return view($this->base_folder_name.'.edit',compact('user','panel_title','user_active'));
    }
 
    /**

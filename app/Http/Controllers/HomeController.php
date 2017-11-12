@@ -65,6 +65,7 @@ class HomeController extends Controller
 				$day_month=$this->day_month_array();
 				$departments=Department::lists('name','id');
 				$ref_doctors=Doctor::lists('name','id');
+
         return view('home.form.store_reservation',compact('devices','device_procedures','rs_places_list','day_month','departments','ref_doctors'));
     }
 		private function day_month_array()
@@ -93,7 +94,7 @@ class HomeController extends Controller
 			if(count(Session::get('proc_devices')) == 0)
 				return redirect()->back()->withErrors(array('proc_device'=>'لا يوجد فحوصات تمت حجزها'))->withInput();
 			DB::beginTransaction();
-		//	try{
+			try{
 
 				$proc_devices=Session::get('proc_devices');
 				$input['sin']=$input['sin']==""?null:$input['sin'];
@@ -105,36 +106,40 @@ class HomeController extends Controller
 					'entry_id'=>$input['rs_place'],
 					'user_id'=>$this->user->id
 				]);
-				foreach($proc_devices as $row)
-				{
-					foreach($row as $row1)
-					{
-						$procedure=Procedure::find($row1[0][0]);
-						$medical_device_procedure=$procedure->devices()->where('medical_device_id',$row1[1][0])->first();
-
-						$m_order_item=MedicalOrderItem::create([
-							'visit_id'=>$visit->id,
-							'medical_device_procedure_id'=>$medical_device_procedure->pivot->id,
-							'procedure_status'=>$row1[2][1],
-							'procedure_date'=>$row1[2][0],
-							'department_id'=>$row1[2][2],
-							'xray_doctor_id'=>$row1[2][3],
-							'user_id'=>$this->user->id
-						]);
-						$this->sendingData($visit,$m_order_item);
-
-					}
-				}
+				$this->send_rad($proc_devices);
 				Session::forget('proc_devices');
 				DB::commit();
 				return redirect()->back()->withSuccessMessage(Lang::get('flash_messages.success'));
-			// }
-			// catch (\Exception $e){
-				// DB::rollBack();
-				// return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
-			// }
+		  }
+			catch (\Exception $e){
+				 DB::rollBack();
+				 return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
+			}
 		}
 
+		private function send_rad($proc_devices)
+		{
+			foreach($proc_devices as $row)
+			{
+				foreach($row as $row1)
+				{
+					$procedure=Procedure::find($row1[0][0]);
+					$medical_device_procedure=$procedure->devices()->where('medical_device_id',$row1[1][0])->first();
+
+					$m_order_item=MedicalOrderItem::create([
+						'visit_id'=>$visit->id,
+						'medical_device_procedure_id'=>$medical_device_procedure->pivot->id,
+						'procedure_status'=>$row1[2][1],
+						'procedure_date'=>$row1[2][0],
+						'department_id'=>$row1[2][2],
+						'xray_doctor_id'=>$row1[2][3],
+						'user_id'=>$this->user->id
+					]);
+					$this->sendingData($visit,$m_order_item);
+
+				}
+			}
+		}
 		public function edit($vid)
 	  {
 			Session::forget('proc_devices');
@@ -142,7 +147,6 @@ class HomeController extends Controller
 			if(Carbon::parse($visit->created_at)->format('Y-m-d') == Carbon::now()->format('Y-m-d')){
 				$orders= $visit->orders;
 			}
-
 			else{
 				$orders= $visit->orders()->whereDate('procedure_date','>',Carbon::now()->format('Y-m-d'))->get();
 			}
@@ -180,36 +184,11 @@ class HomeController extends Controller
 				$input['sin']=$input['sin']==""?null:$input['sin'];
 				$patient=Patient::find($visit->patient_id)->update($input);
 				$visit->update(array('entry_id'=>$input['rs_place']));
-				//dd($proc_devices);
-
-
 				$orders=$visit->orders;
-				foreach($orders as $order){
-					$m_order_item=MedicalOrderItem::find($order->id);
-					$this->sendingData($visit,$m_order_item,'cancel');
-					$m_order_item->delete();
-
-				}
-				foreach($proc_devices as $row)
-				{
-					foreach($row as $row1)
-					{
-						$procedure=Procedure::find($row1[0][0]);
-						$medical_device_procedure=$procedure->devices()->where('medical_device_id',$row1[1][0])->first();
-
-						$m_order_item=MedicalOrderItem::create([
-							'visit_id'=>$visit->id,
-							'medical_device_procedure_id'=>$medical_device_procedure->pivot->id,
-							'procedure_status'=>$row1[2][1],
-							'procedure_date'=>$row1[2][0],
-							'department_id'=>$row1[2][2],
-							'xray_doctor_id'=>$row1[2][3],
-							'user_id'=>$this->user->id
-						]);
-						$this->sendingData($visit,$m_order_item);
-
-					}
-				}
+				// call function for canceling orders //
+				$this->cancel_rad($orders);
+				// call function for sending orders //
+				$this->send_rad($proc_devices);
 				Session::forget('proc_devices');
 				DB::commit();
 				return redirect()->route('ris.home')->withSuccessMessage(Lang::get('flash_messages.success'));
@@ -218,6 +197,14 @@ class HomeController extends Controller
 				DB::rollBack();
 				return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
 			}
+		}
+		private function cancel_rad($orders)
+		{
+				foreach($orders as $order){
+					$m_order_item=MedicalOrderItem::find($order->id);
+					$this->sendingData($visit,$m_order_item,'cancel');
+					$m_order_item->delete();
+				}
 		}
 		public function ajaxStoreDeviceProc(){
 			if(request()->ajax()){
@@ -346,7 +333,8 @@ class HomeController extends Controller
 																->get();
 
 				$devices= MedicalDevice::lists('name','id');
-				return view('home.patients_table',compact('orders','devices'));
+				$patient_active='true';
+				return view('home.patients_table',compact('orders','devices','patient_active'));
 		}
 		public function post_search()
 		{
@@ -397,7 +385,8 @@ class HomeController extends Controller
 															->get();
 
 			$devices= MedicalDevice::lists('name','id');
-			return view('home.patients_table',compact('orders','devices'));
+			$patient_active='true';
+			return view('home.patients_table',compact('orders','devices','patient_active'));
 		}
 		private function sendingData($visit,$medical_order_item,$op='add'){
 

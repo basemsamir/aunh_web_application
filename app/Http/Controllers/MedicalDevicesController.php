@@ -22,7 +22,8 @@ class MedicalDevicesController extends Controller
      {
          //
          $panel_title='بيانات الأجهزة';
-         return view($this->base_folder_name.'.store',compact('panel_title'));
+         $dev_active='true';
+         return view($this->base_folder_name.'.store',compact('panel_title','dev_active'));
      }
 
      /**
@@ -54,8 +55,9 @@ class MedicalDevicesController extends Controller
      {
          //
          $panel_title='بيانات الأجهزة';
+         $dev_active='true';
          $device=MedicalDevice::find($id);
-         return view($this->base_folder_name.'.edit',compact('device','panel_title'));
+         return view($this->base_folder_name.'.edit',compact('device','panel_title','dev_active'));
      }
 
      /**

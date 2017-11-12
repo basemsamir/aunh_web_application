@@ -21,8 +21,9 @@ class ProceduresController extends Controller
   {
       //
       $panel_title='بيانات الفحوصات';
+      $proc_active='true';
       $proceduretypes=ProcedureType::lists('name','id');
-      return view($this->base_folder_name.'.store',compact('panel_title','proceduretypes'));
+      return view($this->base_folder_name.'.store',compact('panel_title','proceduretypes','proc_active'));
   }
 
   /**
@@ -54,9 +55,10 @@ class ProceduresController extends Controller
   {
       //
       $panel_title='بيانات الفحوصات';
+      $proc_active='true';
       $proc=Procedure::find($id);
       $proceduretypes=ProcedureType::lists('name','id');
-      return view($this->base_folder_name.'.edit',compact('proc','panel_title','proceduretypes'));
+      return view($this->base_folder_name.'.edit',compact('proc','panel_title','proceduretypes','proc_active'));
   }
 
   /**

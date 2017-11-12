@@ -21,9 +21,10 @@ class ReservationPlaceUsersController extends Controller
     {
         //
         $panel_title='بيانات مستخدمين مكاتب الحجز';
+        $res_user_active='true';
         $users=User::lists('name','id');
         $reservation_places=ReservationPlace::lists('name','id');
-        return view($this->base_folder_name.'.res_user_store',compact('panel_title','users','reservation_places'));
+        return view($this->base_folder_name.'.res_user_store',compact('panel_title','users','reservation_places','res_user_active'));
     }
 
     /**

@@ -21,9 +21,10 @@ class MedicalDeviceProceduresController extends Controller
   {
       //
       $panel_title='بيانات فحوصات أجهزة الأشعة';
+      $dev_proc_active='true';
       $procs=Procedure::lists('name','id');
       $devices=MedicalDevice::lists('name','id');
-      return view($this->base_folder_name.'.device_proc_store',compact('panel_title','procs','devices'));
+      return view($this->base_folder_name.'.device_proc_store',compact('panel_title','procs','devices','dev_proc_active'));
   }
 
   /**

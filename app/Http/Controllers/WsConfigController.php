@@ -5,12 +5,13 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Lang;
 use App\Http\Requests;
-use App\Department;
+use App\Wsconfig;
 
-class DepartmentsController extends Controller
+class WsConfigController extends Controller
 {
-    private $action_index='dep_index';
-    private $base_folder_name='admin.departments';
+    private $action_index='wsconfig_index';
+    private $base_folder_name='admin.wsconfig';
+
     /**
      * Show the form for creating a new resource.
      *
@@ -19,9 +20,8 @@ class DepartmentsController extends Controller
     public function create()
     {
         //
-        $panel_title='بيانات الأقسام';
-        $dep_active='true';
-        return view($this->base_folder_name.'.store',compact('panel_title','dep_active'));
+        $panel_title='بيانات إعدادات التواصل مع خدمة الويب الخاصة بالنظام الأشعة';;
+        return view($this->base_folder_name.'.store',compact('panel_title'));
     }
 
     /**
@@ -33,12 +33,18 @@ class DepartmentsController extends Controller
     public function store(Request $request)
     {
         //
-        $rules['name']='required|min:4|max:20|unique:departments,name';
-        $message['name.unique']='أسم القسم موجود من قبل';
-        $this->validate($request,$rules,$message);
-        Department::create($request->all());
+        $rules['url']='required|url';
+        $rules['sending_app']='required';
+        $rules['receiving_app']='required';
+        $rules['sending_fac']='required';
+        $rules['receiving_fac']='required';
+        $this->validate($request,$rules);
+
+        Wsconfig::create($request->all());
         return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
+
     }
+
 
 
     /**
@@ -50,10 +56,9 @@ class DepartmentsController extends Controller
     public function edit($id)
     {
         //
-        $panel_title='بيانات الأقسام';
-        $dep_active='true';
-        $dep=Department::find($id);
-        return view($this->base_folder_name.'.edit',compact('dep','panel_title','dep_active'));
+        $wsconfig=Wsconfig::find($id);
+        $panel_title='بيانات إعدادات التواصل مع خدمة الويب الخاصة بالنظام الأشعة';;
+        return view($this->base_folder_name.'.edit',compact('panel_title','wsconfig'));
     }
 
     /**
@@ -66,13 +71,17 @@ class DepartmentsController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $rules['name']='required|min:4|max:20|unique:departments,name,'.$id;
-        $message['name.unique']='أسم القسم موجود من قبل';
-        $this->validate($request,$rules,$message);
-        $dep=Department::find($id);
-        $dep->name=$request->input('name');
-        $dep->save();
+        $rules['url']='required|url';
+        $rules['sending_app']='required';
+        $rules['receiving_app']='required';
+        $rules['sending_fac']='required';
+        $rules['receiving_fac']='required';
+        $this->validate($request,$rules);
+
+        Wsconfig::find($id)->update($request->all());
+
         return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
+
     }
 
     /**
@@ -84,8 +93,7 @@ class DepartmentsController extends Controller
     public function destroy($id)
     {
         //
-        $dep=Department::find($id);
-        $dep->delete();
+        $device=Wsconfig::find($id)->delete();
         return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
 
     }
