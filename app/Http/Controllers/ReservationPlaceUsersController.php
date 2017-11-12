@@ -12,6 +12,10 @@ class ReservationPlaceUsersController extends Controller
 {
     private $action_index='res_user_index';
     private $base_folder_name='admin.users';
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
     /**
      * Show the form for creating a new resource.
      *

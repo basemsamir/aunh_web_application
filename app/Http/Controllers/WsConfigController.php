@@ -11,6 +11,10 @@ class WsConfigController extends Controller
 {
     private $action_index='wsconfig_index';
     private $base_folder_name='admin.wsconfig';
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
 
     /**
      * Show the form for creating a new resource.

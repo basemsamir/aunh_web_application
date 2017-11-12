@@ -82,17 +82,18 @@
                 						<span class="caret"></span>
                            </a>
                           <ul class="dropdown-menu" role="menu">
+                            @if(Auth::guard('admin')->check())
+                            <li>
+                               <a href="{{ url('/admin/wsconfig') }}">
+                                 <i class="fa fa-btn fa-cogs"></i>Ws config
+                               </a>
+                            </li>
+                            @endif
                             <li>
             									<a href="@if(Auth::check()) {{ url('/logout') }} @else {{ url('/admin/logout') }} @endif">
             								            <i class="fa fa-btn fa-sign-out"></i>Logout</a>
                             </li>
-                            @if(Auth::guard('admin')->check())
-                            <li>
-                               <a href="{{ url('/admin/wsconfig') }}">
-            								     <i class="fa fa-btn fa-cogs"></i>Ws config
-                               </a>
-                            </li>
-                            @endif
+
           							  </ul>
                       </li>
                     @endif

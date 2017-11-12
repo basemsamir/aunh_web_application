@@ -12,6 +12,10 @@ class MedicalDeviceProceduresController extends Controller
 {
   private $action_index='device_proc_index';
   private $base_folder_name='admin.procedures';
+  public function __construct()
+  {
+      $this->middleware('admin');
+  }
   /**
    * Show the form for creating a new resource.
    *

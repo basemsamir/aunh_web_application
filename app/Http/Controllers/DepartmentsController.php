@@ -11,6 +11,10 @@ class DepartmentsController extends Controller
 {
     private $action_index='dep_index';
     private $base_folder_name='admin.departments';
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
     /**
      * Show the form for creating a new resource.
      *

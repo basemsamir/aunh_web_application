@@ -12,6 +12,10 @@ class MedicalDevicesController extends Controller
 
     private $action_index='medical_device_index';
     private $base_folder_name='admin.medical_devices';
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
 
     /**
      * Show the form for creating a new resource.

@@ -12,6 +12,10 @@ class DoctorsController extends Controller
 
     private $action_index='doctor_index';
     private $base_folder_name='admin.doctors';
+    public function __construct()
+    {
+        $this->middleware('admin');
+    }
     /**
      * Show the form for creating a new resource.
      *

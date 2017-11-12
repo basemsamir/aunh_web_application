@@ -48,33 +48,33 @@ class AuthController extends Controller
     }
     public function login(Request $request)
     {
-		
+
         $this->validateLogin($request);
         // If the class is using the ThrottlesLogins trait, we can automatically throttle
         // the login attempts for this application. We'll key this by the username and
         // the IP address of the client making these requests into this application.
-       
+
         $credentials = $this->getCredentials($request);
-		
+
         if (Auth::guard('admin')->attempt($credentials, $request->has('remember'))) {
             return $this->handleUserWasAuthenticated($request);
         }
 
         return $this->sendFailedLoginResponse($request);
     }
-	
+
 	protected function validateLogin(Request $request)
     {
         $this->validate($request, [
             $this->loginUsername() => 'required', 'password' => 'required',
         ]);
     }
-	
+
 	protected function getCredentials(Request $request)
     {
         return $request->only($this->loginUsername(), 'password');
     }
-	
+
 	protected function handleUserWasAuthenticated(Request $request)
     {
         if (method_exists($this, 'authenticated')) {
@@ -82,7 +82,7 @@ class AuthController extends Controller
         }
         return redirect('/admin');
     }
-	
+
 	protected function sendFailedLoginResponse(Request $request)
     {
         return redirect()->back()
@@ -98,7 +98,7 @@ class AuthController extends Controller
                 ? Lang::get('auth.failed')
                 : 'These credentials do not match our records.';
     }
-	
+
 	public function logout()
     {
         Auth::guard('admin')->logout();
