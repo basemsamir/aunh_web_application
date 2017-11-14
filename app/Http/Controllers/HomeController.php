@@ -400,8 +400,8 @@ class HomeController extends Controller
 			$patient=Patient::find($visit->patient_id);
 			//dd($patient);
 			$patientInfo=new patientInfo();
-
-			$patientInfo->PatientID="SMSM11220";
+			// AUNH prefix for all patients over all hospitals
+			$patientInfo->PatientID="AUNH".$patient->id;
 			$patientInfo->PatientBirthdate=$patient->birthdate;
 			$patientInfo->PatientGender=$patient->gender;
 			$names=explode(" ",$patient->name);
