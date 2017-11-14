@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\AdminUser;
 use Validator;
 use Auth;
+use Illuminate\Support\Facades\Lang;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ThrottlesLogins;
 use Illuminate\Foundation\Auth\AuthenticatesAndRegistersUsers;
