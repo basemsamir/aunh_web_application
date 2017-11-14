@@ -2,6 +2,11 @@
 @section('content')
 <div class="container" >
   <div class="row" dir="rtl">
+
+    <div class="alert alert-warning" id="saveing_state" style="display:none" >
+			<a href="#" class="close" style="float:left">&times;</a>
+			<b></b>
+		</div>
 		@include('layouts.flash_message')
 
 		@yield('forms')
@@ -40,7 +45,10 @@ $(document).ajaxComplete(function(){
     $("#overlay").hide();
 });
 $(document).ready(function(){
-
+  $("#patient_form").submit(function(){
+      $("#saveing_state b").text('جاري حفظ البيانات .....');
+      $("#saveing_state").show();
+  });
   $('#patient_tb').DataTable({
           "processing": true,
           "serverSide": true,
@@ -82,6 +90,8 @@ $(document).ready(function(){
   $("#datepicker2").datepicker('setDate',today);
 	$('#device').change(function(){
 		if($('#device').val() != ""){
+      $("#saveing_state b").text('جاري تحميل البيانات .....');
+      $("#saveing_state").show();
 			var url = "{{ url('ajax/getProcedures') }}";
 
 			$.ajax({
@@ -96,12 +106,13 @@ $(document).ready(function(){
 							$('#procedure_name').append($('<option>', {value:data['procedures'][i].id, text:data['procedures'][i].name}));
 						}
 					}
+
 				},
 				error: function (data) {
 					alert("Error");
 				}
 			});
-
+      $("#saveing_state").hide();
 		}
 	});
   $('#year_age').keyup(function(){
@@ -179,6 +190,8 @@ function isForteen(event){
 var proc_device=Array();
 function addProcedure(){
 
+  $("#saveing_state b").text('جاري إضافة الفحص .....');
+  $("#saveing_state").show();
 	var row_id="row_"+$("#device option:selected").val()+"_"+$("#procedure_name option:selected").val();
 	var id=$("#device option:selected").val()+"_"+$("#procedure_name option:selected").val();
 	var flag=false;
@@ -226,6 +239,7 @@ function addProcedure(){
 		});
 
 	}
+  $("#saveing_state").hide();
 }
 function delete_proc_device(device_id,proc_id){
 

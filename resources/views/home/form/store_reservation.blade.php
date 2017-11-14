@@ -60,8 +60,7 @@
 						@if ($errors->has('phone_num'))<span class="help-block">{{ $errors->first('phone_num') }}</span>@endif
 					 </div>
 				   <button type="submit" class="btn btn-primary" >تسجيل</button>
-				   <input type="reset" class="btn btn-success" value="جديد" onclick="$('#err_msg').hide();$('.form input').removeAttr('disabled');$('#gender_select').removeAttr('disabled');
-					$('.alert').hide();" />
+				   <input type="reset" class="btn btn-success" value="جديد"  />
 				</div>
 				<!-- col-md-6 -->
 
