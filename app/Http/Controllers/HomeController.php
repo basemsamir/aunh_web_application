@@ -93,8 +93,8 @@ class HomeController extends Controller
 			$input=$request->all();
 			if(count(Session::get('proc_devices')) == 0)
 				return redirect()->back()->withErrors(array('proc_device'=>'لا يوجد فحوصات تمت حجزها'))->withInput();
-			DB::beginTransaction();
-			try{
+			 DB::beginTransaction();
+			 try{
 
 				$proc_devices=Session::get('proc_devices');
 				$input['sin']=$input['sin']==""?null:$input['sin'];
@@ -106,7 +106,7 @@ class HomeController extends Controller
 					'entry_id'=>$input['rs_place'],
 					'user_id'=>$this->user->id
 				]);
-				$this->send_rad($proc_devices);
+				$this->send_rad($proc_devices,$visit);
 				Session::forget('proc_devices');
 				DB::commit();
 				return redirect()->back()->withSuccessMessage(Lang::get('flash_messages.success'));
@@ -117,7 +117,7 @@ class HomeController extends Controller
 			}
 		}
 
-		private function send_rad($proc_devices)
+		private function send_rad($proc_devices,$visit)
 		{
 			foreach($proc_devices as $row)
 			{
@@ -186,9 +186,9 @@ class HomeController extends Controller
 				$visit->update(array('entry_id'=>$input['rs_place']));
 				$orders=$visit->orders;
 				// call function for canceling orders //
-				$this->cancel_rad($orders);
+				$this->cancel_rad($orders,$visit);
 				// call function for sending orders //
-				$this->send_rad($proc_devices);
+				$this->send_rad($proc_devices,$visit);
 				Session::forget('proc_devices');
 				DB::commit();
 				return redirect()->route('ris.home')->withSuccessMessage(Lang::get('flash_messages.success'));
@@ -198,7 +198,7 @@ class HomeController extends Controller
 				return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
 			}
 		}
-		private function cancel_rad($orders)
+		private function cancel_rad($orders,$visit)
 		{
 				foreach($orders as $order){
 					$m_order_item=MedicalOrderItem::find($order->id);
@@ -299,7 +299,7 @@ class HomeController extends Controller
 					{
 						$edit =  route('ris.edit',$patient_visit->vid);
 
-						$nestedData['id'] = $patient_visit->id;
+						$nestedData['id'] = "N".$patient_visit->id;
 						$nestedData['name'] = $patient_visit->name;
 						$nestedData['sin'] = $patient_visit->sin;
 						$nestedData['options'] = "<a href='{$edit}' title='تحديد'  class='btn btn-info'  >
@@ -324,13 +324,16 @@ class HomeController extends Controller
 		}
 		public function search($value='')
 		{
-				$orders=MedicalOrderItem::with('visit','visit.patient',
-																			 'medical_device_proc.device_order_item',
-																			 'medical_device_proc.proc_order_item',
-																			 'department',
-																			 'ref_doctor')
-															  ->whereDate('created_at','=',Carbon::now()->format('Y-m-d'))
-																->get();
+				$orders=MedicalOrderItem::join('visits','visits.id','=','medical_order_items.visit_id')
+															->join('patients','patients.id','=','visits.patient_id')
+															->join('medical_device_procedure','medical_device_procedure.id','=','medical_order_items.medical_device_procedure_id')
+															->join('medical_devices','medical_devices.id','=','medical_device_procedure.medical_device_id')
+															->join('procedures','procedures.id','=','medical_device_procedure.procedure_id')
+															->select('visits.id as vid','patients.id','patients.name','sin','birthdate','address','procedure_date','procedure_status'
+																			,'medical_devices.name as dev_name','procedures.name as proc_name')
+															
+								  ->whereDate('medical_order_items.created_at','=',Carbon::now()->format('Y-m-d'))
+									->get();
 
 				$devices= MedicalDevice::lists('name','id');
 				$patient_active='true';
@@ -401,7 +404,7 @@ class HomeController extends Controller
 			//dd($patient);
 			$patientInfo=new patientInfo();
 			// AUNH prefix for all patients over all hospitals
-			$patientInfo->PatientID="AUNH".$patient->id;
+			$patientInfo->PatientID="N".$patient->id;
 			$patientInfo->PatientBirthdate=$patient->birthdate;
 			$patientInfo->PatientGender=$patient->gender;
 			$names=explode(" ",$patient->name);

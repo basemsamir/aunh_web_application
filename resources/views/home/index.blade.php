@@ -38,13 +38,22 @@
 @endsection
 @section('javascript')
 <script>
+var show_saving_state=false;
 $(document).ajaxStart(function(){
-    $("#overlay").show();
+    if(show_saving_state){
+      $("#saveing_state b").text('جاري تحميل البيانات .....');
+      $("#saveing_state").show();
+    }
 });
 $(document).ajaxComplete(function(){
-    $("#overlay").hide();
+  if(show_saving_state){
+    show_saving_state=false;
+    $("#saveing_state").hide();
+  }
 });
 $(document).ready(function(){
+
+
   $("#patient_form").submit(function(){
       $("#saveing_state b").text('جاري حفظ البيانات .....');
       $("#saveing_state").show();
@@ -90,8 +99,8 @@ $(document).ready(function(){
   $("#datepicker2").datepicker('setDate',today);
 	$('#device').change(function(){
 		if($('#device').val() != ""){
-      $("#saveing_state b").text('جاري تحميل البيانات .....');
-      $("#saveing_state").show();
+      show_saving_state=true;
+
 			var url = "{{ url('ajax/getProcedures') }}";
 
 			$.ajax({
@@ -112,7 +121,6 @@ $(document).ready(function(){
 					alert("Error");
 				}
 			});
-      $("#saveing_state").hide();
 		}
 	});
   $('#year_age').keyup(function(){
@@ -190,8 +198,7 @@ function isForteen(event){
 var proc_device=Array();
 function addProcedure(){
 
-  $("#saveing_state b").text('جاري إضافة الفحص .....');
-  $("#saveing_state").show();
+  show_saving_state=true;
 	var row_id="row_"+$("#device option:selected").val()+"_"+$("#procedure_name option:selected").val();
 	var id=$("#device option:selected").val()+"_"+$("#procedure_name option:selected").val();
 	var flag=false;
@@ -239,7 +246,7 @@ function addProcedure(){
 		});
 
 	}
-  $("#saveing_state").hide();
+
 }
 function delete_proc_device(device_id,proc_id){
 
