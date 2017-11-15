@@ -62,8 +62,6 @@ class ReservationPlaceUsersController extends Controller
      */
     public function destroy($id,Request $request)
     {
-        //
-
         $rules['user_id']='required';
         $this->validate($request,$rules);
         $res_place=ReservationPlace::find($id);

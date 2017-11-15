@@ -74,9 +74,7 @@ class ReservationPlacesController extends Controller
         $rules['name']='required|min:4|max:20|unique:reservation_places,name,'.$id;
         $message['name.unique']='أسم المكتب موجود من قبل';
         $this->validate($request,$rules,$message);
-        $place=ReservationPlace::find($id);
-        $place->name=$request->input('name');
-        $place->save();
+        ReservationPlace::find($id)->update($request->all());
         return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
     }
 

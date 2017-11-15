@@ -73,9 +73,7 @@ class DepartmentsController extends Controller
         $rules['name']='required|min:4|max:20|unique:departments,name,'.$id;
         $message['name.unique']='أسم القسم موجود من قبل';
         $this->validate($request,$rules,$message);
-        $dep=Department::find($id);
-        $dep->name=$request->input('name');
-        $dep->save();
+        Department::find($id)->update($request->all());
         return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
     }
 

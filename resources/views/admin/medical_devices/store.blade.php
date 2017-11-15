@@ -17,6 +17,11 @@
                     {!! Form::text('name',null,array('class'=>'form-control')) !!}
                     @if($errors->has('name')) <span class="help-block">{{ $errors->first('name') }}</span> @endif
                   </div>
+                  <div class="form-group @if($errors->has('medical_device_type_id')) has-error @endif">
+                    {!! Form::label('النوع') !!}
+                    {!! Form::select('medical_device_type_id',$types,null,array('class'=>'form-control')) !!}
+                    @if($errors->has('medical_device_type_id')) <span class="help-block">{{ $errors->first('medical_device_type_id') }}</span> @endif
+                  </div>
                   <div class="form-group @if($errors->has('location')) has-error @endif">
                     {!! Form::label('المكان') !!}
                     {!! Form::text('location',null,array('class'=>'form-control')) !!}

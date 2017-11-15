@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class MedicalDevice extends Model
 {
     //
-	protected $fillable=['name','location'];
+	protected $fillable=['name','medical_device_type_id','location'];
 	public function procedures(){
 
 		return $this->belongsToMany('App\Procedure')->withPivot('id')->withTimestamps();
@@ -16,5 +16,8 @@ class MedicalDevice extends Model
 
 		return $this->hasMany('App\MedicalDeviceProcedure');
 	}
+	public function medical_device_type(){
 
+		return $this->belongsTo('App\MedicalDeviceType');
+	}
 }

@@ -78,11 +78,7 @@ class ProceduresController extends Controller
       $rules['name']='required|min:4|max:20|unique:procedures,name,'.$id;
       $message['name.unique']='أسم الفحص موجود من قبل';
       $this->validate($request,$rules,$message);
-      $proc=Procedure::find($id);
-      $proc->name=$request->input('name');
-      $proc->proc_ris_id=$request->input('proc_ris_id');
-      $proc->type_id=$request->input('type_id');
-      $proc->save();
+      Procedure::find($id)->update($request->all());
       return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
   }
 

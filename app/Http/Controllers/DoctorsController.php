@@ -75,9 +75,7 @@ class DoctorsController extends Controller
         $rules['name']='required|min:4|max:20|unique:doctors,name,'.$id;
         $message['name.unique']='أسم الطبيب موجود من قبل';
         $this->validate($request,$rules,$message);
-        $doc=Doctor::find($id);
-        $doc->name=$request->input('name');
-        $doc->save();
+        Doctor::find($id)->update($request->all());
         return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
     }
 

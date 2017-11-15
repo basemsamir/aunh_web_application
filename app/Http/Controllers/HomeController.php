@@ -331,7 +331,7 @@ class HomeController extends Controller
 															->join('procedures','procedures.id','=','medical_device_procedure.procedure_id')
 															->select('visits.id as vid','patients.id','patients.name','sin','birthdate','address','procedure_date','procedure_status'
 																			,'medical_devices.name as dev_name','procedures.name as proc_name')
-															
+
 								  ->whereDate('medical_order_items.created_at','=',Carbon::now()->format('Y-m-d'))
 									->get();
 
@@ -449,9 +449,8 @@ class HomeController extends Controller
 			$procedure=Procedure::find($medical_device_procedure->procedure_id);
 			$device=MedicalDevice::find($medical_device_procedure->medical_device_id);
 
-			$device_name=$device->name;
-			$orcOrderInfo->ModalityType= ""; // string
-			$orcOrderInfo->ModalityName= $device_name; // string
+			$orcOrderInfo->ModalityType= $device->type; // string
+			$orcOrderInfo->ModalityName= $device->name; // string
 
 			$procedureInfo=new procedureInfo();
 			$procedureInfo->ProcedureID=$procedure->proc_ris_id; // string

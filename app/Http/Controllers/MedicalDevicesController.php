@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Lang;
 use App\MedicalDevice;
+use App\MedicalDeviceType;
 use App\Http\Requests;
 
 class MedicalDevicesController extends Controller
@@ -27,7 +28,8 @@ class MedicalDevicesController extends Controller
          //
          $panel_title='بيانات الأجهزة';
          $dev_active='true';
-         return view($this->base_folder_name.'.store',compact('panel_title','dev_active'));
+         $types=MedicalDeviceType::lists('name','id');
+         return view($this->base_folder_name.'.store',compact('panel_title','dev_active','types'));
      }
 
      /**
@@ -40,15 +42,13 @@ class MedicalDevicesController extends Controller
      {
          //
          $rules['name']='required|min:4|max:20|unique:medical_devices,name';
+         $rules['medical_device_type_id']='required';
          $rules['location']='min:4|max:20';
          $message['name.unique']="أسم الجهاز موجود من قبل";
          $this->validate($request,$rules,$message);
          MedicalDevice::create($request->all());
          return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
      }
-
-
-
      /**
       * Show the form for editing the specified resource.
       *
@@ -61,7 +61,8 @@ class MedicalDevicesController extends Controller
          $panel_title='بيانات الأجهزة';
          $dev_active='true';
          $device=MedicalDevice::find($id);
-         return view($this->base_folder_name.'.edit',compact('device','panel_title','dev_active'));
+         $types=MedicalDeviceType::lists('name','id');
+         return view($this->base_folder_name.'.edit',compact('device','panel_title','dev_active','types'));
      }
 
      /**
@@ -75,13 +76,11 @@ class MedicalDevicesController extends Controller
      {
          //
          $rules['name']='required|min:4|max:20|unique:medical_devices,name,'.$id;
+         $rules['medical_device_type_id']='required';
          $rules['location']='min:4|max:20';
          $message['name.unique']="أسم الجهاز موجود من قبل";
          $this->validate($request,$rules,$message);
-         $device=MedicalDevice::find($id);
-         $device->name=$request->input('name');
-         $device->location=$request->input('location');
-         $device->save();
+         $device=MedicalDevice::find($id)->update($request->all());
          return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
      }
 
