@@ -90,7 +90,7 @@ return [
     | specify a specific custom language line for a given attribute rule.
     |
     */
-
+    "sin_format" => "Your input was invalid!",
     'custom' => [
         'attribute-name' => [
             'rule-name' => 'custom-message',

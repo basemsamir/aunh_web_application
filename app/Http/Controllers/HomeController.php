@@ -158,6 +158,7 @@ class HomeController extends Controller
 				Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device,$order->procedure_date,$order->procedure_status,$order->department_id,$order->xray_doctor_id));
 			}
 			$patient= $visit->patient;
+
 			$age=Carbon::parse($patient->birthdate)->diffInYears(Carbon::now());
 			$devices= MedicalDevice::lists('name','id');
 			$first_device=MedicalDevice::first();
@@ -176,7 +177,7 @@ class HomeController extends Controller
 	  {
 			$input=$request->all();
 			if(count(Session::get('proc_devices')) == 0)
-				return redirect()->back()->withErrors(array('proc_device'=>'لا يوجد فحوصات تمت حجزها'));
+				return redirect()->back()->withErrors(array('proc_device'=>'لا يوجد فحوصات تمت حجزها'))->withInput();
 			DB::beginTransaction();
 			try{
 				$visit=Visit::find($vid);
@@ -263,7 +264,7 @@ class HomeController extends Controller
 				$order = $columns[$request->input('order.0.column')];
 				$dir = $request->input('order.0.dir');
 
-				if(empty(trim($request->input('search.value'))))
+				if(empty(trim($request->input('search.value'))) || trim($request->input('search.value')) == "N")
 				{
 					$patient_visits = Visit::join('patients','patients.id','=','visits.patient_id')
 									 ->offset($start)
@@ -274,8 +275,10 @@ class HomeController extends Controller
 									 ->get();
 				}
 				else {
-					$search = $request->input('search.value');
 
+					$search = $request->input('search.value');
+					if($search[0] == "N" or $search[0] == "n")
+						$search=substr($search,1);
 					$patient_visits = Visit::join('patients','patients.id','=','visits.patient_id')
 									->where('patients.id','LIKE',"%{$search}%")
 									->orWhere('name', 'LIKE',"%{$search}%")
@@ -373,8 +376,12 @@ class HomeController extends Controller
 															->where(function($query) use($input)
 															{
 																# code...
-																	if($input['pid'] != "")
+																	if($input['pid'] != ""){
+																		if($input['pid'][0] == "N" || $input['pid'][0] == "n")
+																			$input['pid']=substr($input['pid'],1);
 																		$query->where('patients.id',$input['pid']);
+																	}
+
 																	elseif($input['name'] != "")
 																		$query->where('patients.name','like',"%$input[name]%");
 

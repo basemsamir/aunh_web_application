@@ -35,9 +35,13 @@ class ReservationRequest extends Request
 					'address'=>'min:3',
 					'nationality'=>'min:3',
 					'phone_number'=>'min:4|max:20',
-					'birthdate' => 'required|date'
+					'birthdate' => 'required|date',
+				  'sin'=>'numeric|sin_format|unique:patients,sin',
         ];
     }
-
+		public function messages($value='')
+		{
+				return ['sin.unique'=>'الرقم القومي موجود من قبل'];
+		}
 
 }

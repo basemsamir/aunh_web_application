@@ -149,6 +149,7 @@ return [
         Illuminate\View\ViewServiceProvider::class,
 		Collective\Html\HtmlServiceProvider::class,
 		Clockwork\Support\Laravel\ClockworkServiceProvider::class,
+     App\Providers\SINValidationRuleProvider::class,
 
         /*
          * Application Service Providers...

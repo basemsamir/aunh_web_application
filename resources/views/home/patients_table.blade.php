@@ -75,7 +75,7 @@
 
                       @foreach($orders as $order)
                       <tr>
-                        <td>{{ $order->id }}</td>
+                        <td>{{ 'N'.$order->id }}</td>
                         <td>{{  $order->name }}</td>
                         <td>{{  $order->sin }}</td>
                         <td>{{ $order->birthdate}}</td>

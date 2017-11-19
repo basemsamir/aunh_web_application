@@ -36,7 +36,7 @@
 				<div class="col-md-6">
 				   <div class="form-group">
 					 {!! Form::label('الكود',null) !!}
-					 {!! Form::text('id',null,array('class'=>'form-control','disabled','id'=>'pid','placeholder'=>'الكود','onkeypress'=>'return isNumber(event)')) !!}
+					 {!! Form::text('id',null,array('class'=>'form-control','disabled','id'=>'pid','placeholder'=>'الكود')) !!}
 					 @if ($errors->has('id'))<span class="help-block">{{ $errors->first('id') }}</span>@endif
 				  </div>
 				   <div class="form-group @if($errors->has('name')) {{ 'has-error'}} @endif">
@@ -46,7 +46,7 @@
 				   </div>
 				   <div class="form-group @if($errors->has('sin')) {{ 'has-error'}} @endif">
 					 {!! Form::label('الرقم القومي',null) !!}
-					 {!! Form::text('sin',null,array('class'=>'form-control','id'=>'sin','placeholder'=>'الرقم القومي','onkeypress'=>'return isNumber(event)&&isForteen()')) !!}
+					 {!! Form::text('sin',null,array('class'=>'form-control','id'=>'sin','placeholder'=>'الرقم القومي','onkeypress'=>'return isNumber(event)&&isForteen(event)')) !!}
 					  @if ($errors->has('sin'))<span class="help-block">{{ $errors->first('sin') }}</span>@endif
 				   </div>
 				   <div class="form-group @if($errors->has('gender')) {{ 'has-error'}} @endif">
@@ -54,10 +54,10 @@
 					 {!! Form::select('gender',[''=>'أختر النوع','M' => 'ذكر', 'F' => 'أنثى'], $patient->gender,['class'=>'form-control','id'=>'gender_select']); !!}
 					  @if ($errors->has('gender'))<span class="help-block">{{ $errors->first('gender') }}</span>@endif
 				   </div>
-					 <div class="form-group @if($errors->has('phone_num')) {{ 'has-error'}} @endif">
+					 <div class="form-group @if($errors->has('phone_number')) {{ 'has-error'}} @endif">
 					 {!! Form::label('رقم التليفون',null) !!}
-					 {!! Form::text('phone_num',null,array('class'=>'form-control','id'=>'phone_number','placeholder'=>'رقم التليفون','onkeypress'=>'return isNumber(event)')) !!}
-						@if ($errors->has('phone_num'))<span class="help-block">{{ $errors->first('phone_num') }}</span>@endif
+					 {!! Form::text('phone_number',null,array('class'=>'form-control','id'=>'phone_number','placeholder'=>'رقم التليفون','onkeypress'=>'return isNumber(event)')) !!}
+						@if ($errors->has('phone_number'))<span class="help-block">{{ $errors->first('phone_number') }}</span>@endif
 					 </div>
 				   <button type="submit" class="btn btn-primary" onclick="submitForm()">إضافة و حفظ</button>
 

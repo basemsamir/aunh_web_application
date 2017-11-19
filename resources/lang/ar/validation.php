@@ -90,7 +90,7 @@ return [
     | specify a specific custom language line for a given attribute rule.
     |
     */
-
+    "sin_format" => "الرقم القومي غير صحيح",
     'custom' => [
         'attribute-name' => [
             'rule-name' => 'custom-message',
