@@ -40,18 +40,24 @@ class MedicalDeviceProceduresController extends Controller
   public function store(Request $request)
   {
       //
+
       $rules['dev_id']='required';
       $rules['proc_id']='required';
       $this->validate($request,$rules);
 
       $device=MedicalDevice::find($request->input('dev_id'));
-      $proc=Procedure::find($request->input('proc_id'));
-      if($device->procedures()->where('procedure_id',$request->input('proc_id'))->count() > 0)
-        return redirect()->action('AdminController@'.$this->action_index)->withFailureMessage(' الفحص '.$proc->name." محجوز للجهاز ".$device->name );
-      else {
-        $device->procedures()->attach($request->input('proc_id'));
-        return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
+      $proc_ids=$request->input('proc_id');
+
+      foreach($proc_ids as $proc_id){
+          if($device->procedures()->where('procedure_id',$proc_id)->count() > 0){
+            $proc=Procedure::find($proc_id);
+            return redirect()->action('AdminController@'.$this->action_index)->withFailureMessage(' الفحص '.$proc->name." محجوز للجهاز ".$device->name );
+          }
+          else {
+            $device->procedures()->attach($proc_id);
+          }
       }
+      return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
   }
 
   /**

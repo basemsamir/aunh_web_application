@@ -19,7 +19,7 @@
                   </div>
                   <div class="form-group @if($errors->has('proc_id')) has-error @endif">
                     {!! Form::label('أسم الفحص') !!}
-                    {!! Form::select('proc_id',$procs,null,array('class'=>'form-control')) !!}
+                    {!! Form::select('proc_id[]',$procs,null,array('class'=>'form-control','multiple'=>'multiple')) !!}
                     @if($errors->has('proc_id')) <span class="help-block">{{ $errors->first('proc_id') }}</span> @endif
                   </div>
                   <hr>
