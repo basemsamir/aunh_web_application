@@ -3,10 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Fish\Logger\Logger;
 class MedicalDeviceProcedure extends Model
 {
     //
+	use Logger;
 	protected $table='medical_device_procedure';
 
 	public function order_item($value='')

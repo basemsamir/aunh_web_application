@@ -3,10 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Fish\Logger\Logger;
 class MedicalDevice extends Model
 {
     //
+	use Logger;
 	protected $fillable=['name','medical_device_type_id','location'];
 	public function procedures(){
 

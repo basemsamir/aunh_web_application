@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "997de2248eb5bb4c200a22a79acd417f",
-    "content-hash": "11af946d87c6e7aa623acde6e8e3fdd2",
+    "hash": "f4691521ddb7524f290f686ac9d6887b",
+    "content-hash": "362388e8586592bb39516becf4f0311d",
     "packages": [
         {
             "name": "classpreloader/classpreloader",
@@ -160,6 +160,58 @@
                 "string"
             ],
             "time": "2015-11-06 14:35:42"
+        },
+        {
+            "name": "fish/eloquent-logger",
+            "version": "1.3.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/matfish2/eloquent-logger.git",
+                "reference": "2dafabc7294b3b9e107dba7224b8202a0cfdca6a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/matfish2/eloquent-logger/zipball/2dafabc7294b3b9e107dba7224b8202a0cfdca6a",
+                "reference": "2dafabc7294b3b9e107dba7224b8202a0cfdca6a",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^4.2|^5.0",
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "fish/eloquent-cascade": "^1.0",
+                "illuminate/auth": "^4.2|^5.0",
+                "illuminate/config": "^4.2|^5.0",
+                "illuminate/database": "^4.2|^5.0",
+                "orchestra/testbench": "^3.2",
+                "phpunit/phpunit": "^5.1"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Fish\\Logger": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Matanya Fishaimer",
+                    "email": "matfish2@gmail.com"
+                }
+            ],
+            "description": "Log Eloquent model changes to a designated logs table",
+            "keywords": [
+                "eloquent",
+                "events",
+                "laravel",
+                "log",
+                "model"
+            ],
+            "time": "2016-04-04 19:37:57"
         },
         {
             "name": "itsgoingd/clockwork",
@@ -1023,6 +1075,61 @@
                 "shell"
             ],
             "time": "2016-03-09 05:03:14"
+        },
+        {
+            "name": "rap2hpoutre/laravel-log-viewer",
+            "version": "v0.11.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rap2hpoutre/laravel-log-viewer.git",
+                "reference": "2a557969a8a23d6b5320f1716748d9577f27f303"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rap2hpoutre/laravel-log-viewer/zipball/2a557969a8a23d6b5320f1716748d9577f27f303",
+                "reference": "2a557969a8a23d6b5320f1716748d9577f27f303",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "4.2.*|5.*",
+                "php": ">=5.4.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Rap2hpoutre\\LaravelLogViewer\\LaravelLogViewerServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "classmap": [
+                    "src/controllers"
+                ],
+                "psr-0": {
+                    "Rap2hpoutre\\LaravelLogViewer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "rap2hpoutre",
+                    "email": "raphaelht@gmail.com"
+                }
+            ],
+            "description": "A Laravel log reader",
+            "keywords": [
+                "laravel",
+                "log",
+                "log-reader",
+                "log-viewer",
+                "logging",
+                "lumen"
+            ],
+            "time": "2017-11-17 10:21:53"
         },
         {
             "name": "swiftmailer/swiftmailer",

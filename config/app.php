@@ -108,7 +108,7 @@ return [
     |
     */
 
-    'log' => env('APP_LOG', 'single'),
+    'log' => env('APP_LOG', 'daily'),
 
     /*
     |--------------------------------------------------------------------------
@@ -147,9 +147,9 @@ return [
         Illuminate\Translation\TranslationServiceProvider::class,
         Illuminate\Validation\ValidationServiceProvider::class,
         Illuminate\View\ViewServiceProvider::class,
-		Collective\Html\HtmlServiceProvider::class,
-		Clockwork\Support\Laravel\ClockworkServiceProvider::class,
-     App\Providers\SINValidationRuleProvider::class,
+		    Collective\Html\HtmlServiceProvider::class,
+		    Clockwork\Support\Laravel\ClockworkServiceProvider::class,
+
 
         /*
          * Application Service Providers...
@@ -158,7 +158,9 @@ return [
         App\Providers\AuthServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-
+        App\Providers\SINValidationRuleProvider::class,
+        Rap2hpoutre\LaravelLogViewer\LaravelLogViewerServiceProvider::class,
+        Fish\Logger\LoggerServiceProvider::class
     ],
 
     /*

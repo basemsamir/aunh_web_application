@@ -33,7 +33,7 @@
         }
     </style>
     @yield('chart')
-    
+
 </head>
 <body id="app-layout">
     <nav class="navbar navbar-default navbar-static-top">
@@ -88,6 +88,16 @@
                             <li>
                                <a href="{{ url('/admin/wsconfig') }}">
                                  <i class="fa fa-btn fa-cogs"></i>Ws config
+                               </a>
+                            </li>
+                            <li>
+                               <a href="{{ url('error_log') }}">
+                                 <i class="fa fa-btn fa-exclamation-triangle"></i> Error log
+                               </a>
+                            </li>
+                            <li>
+                               <a href="{{ url('tran_log') }}">
+                                 <i class="fa fa-btn fa-book" aria-hidden="true"></i></i>Transaction log
                                </a>
                             </li>
                             @endif

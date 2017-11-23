@@ -3,9 +3,11 @@
 namespace App;
 
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Fish\Logger\Logger;
 
 class AdminUser extends Authenticatable
 {
+    use Logger;
     /**
      * The attributes that are mass assignable.
      *

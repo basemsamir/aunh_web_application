@@ -53,3 +53,6 @@ Route::resource('admin/reservation_user','ReservationPlaceUsersController', arra
 Route::resource('admin/device_proc','MedicalDeviceProceduresController', array('except'=>['index','show','update','edit']));
 Route::resource('admin/wsconfig','WsConfigController', array('except'=>['index','show']));
 //Route::get('/home', 'HomeController@index');
+
+Route::get('error_log', '\Rap2hpoutre\LaravelLogViewer\LogViewerController@index');
+Route::get('tran_log', 'AdminController@transactionLog');

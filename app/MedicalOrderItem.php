@@ -3,10 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Fish\Logger\Logger;
 class MedicalOrderItem extends Model
 {
     //
+	use Logger;
 	protected $fillable=[
 		'visit_id',
 		'medical_device_procedure_id',

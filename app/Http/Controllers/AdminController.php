@@ -14,6 +14,7 @@ use App\User;
 use App\Wsconfig;
 use App\MedicalOrderItem;
 use DB;
+use Fish\Logger\Log;
 
 class AdminController extends Controller
 {
@@ -102,5 +103,11 @@ class AdminController extends Controller
 																		->get();
 
 			return response()->json(['data'=>$orders_today]);
+	}
+	public function transactionLog($value='')
+	{
+			$logdata = Log::take(100)->orderBy('id','desc')->get();
+
+			return view('home.tran_log',compact('logdata'));
 	}
 }

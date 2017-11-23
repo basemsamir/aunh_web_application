@@ -3,10 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Fish\Logger\Logger;
 class Visit extends Model
 {
     //
+	use Logger;
 	protected $fillable=[
 		'patient_id',
 		'entry_id',

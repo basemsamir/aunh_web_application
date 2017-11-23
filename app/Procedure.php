@@ -3,10 +3,11 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-
+use Fish\Logger\Logger;
 class Procedure extends Model
 {
     //
+  use Logger;
   protected $fillable=['name','proc_ris_id','type_id'];
 	public function proceduretype(){
 
