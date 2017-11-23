@@ -33,6 +33,7 @@ Route::get('/admin/logout','AdminAuth\AuthController@logout');
 
 //Admin Routes...
 Route::get('/admin', 'AdminController@index');
+Route::get('ajax/getNumberOfReservationsPerDeviceToday', 'AdminController@getStatisticsToday');
 Route::get('admin/reservation_place','AdminController@res_index');
 Route::get('admin/department','AdminController@dep_index');
 Route::get('admin/doctor','AdminController@doctor_index');

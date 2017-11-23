@@ -12,6 +12,8 @@ use App\MedicalDevice;
 use App\Procedure;
 use App\User;
 use App\Wsconfig;
+use App\MedicalOrderItem;
+use DB;
 
 class AdminController extends Controller
 {
@@ -88,5 +90,17 @@ class AdminController extends Controller
 			$configs= Wsconfig::all();
 			$panel_title='بيانات إعدادات التواصل مع خدمة الويب الخاصة بالنظام الأشعة';;
 			return view('admin.wsconfig.index', compact('configs','panel_title'));
+	}
+	public function getStatisticsToday($value='')
+	{
+			$orders_today=MedicalOrderItem::join('medical_device_procedure','medical_order_items.medical_device_procedure_id','=','medical_device_procedure.id')
+																		->join('medical_devices','medical_devices.id','=','medical_device_procedure.medical_device_id')
+																		->join('medical_device_types','medical_device_types.id','=','medical_devices.medical_device_type_id')
+																		->groupBy('medical_device_types.id')
+																		->select('medical_device_types.name as label',DB::raw('count(*) as y'))
+																		->where('medical_order_items.procedure_date','=',date('Y-m-d'))
+																		->get();
+
+			return response()->json(['data'=>$orders_today]);
 	}
 }

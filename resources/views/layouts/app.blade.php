@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <title>AUNH_Registration</title>
+    <title>AUNH Registration</title>
 
     <!-- Fonts -->
     <link rel="stylesheet" href="{{asset('css/font.css')}}" >
@@ -13,7 +13,7 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{asset('css/bootstrap.css')}}" >
-	   <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+	  <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 	<!-- Date Picker -->
     <link rel="stylesheet" href="{{asset('plugins/datepicker/datepicker3.css')}}">
     <link rel="stylesheet" href="{{asset('plugins/datatables/datatable.css')}}">
@@ -32,6 +32,8 @@
           width: 32% !important;
         }
     </style>
+    @yield('chart')
+    
 </head>
 <body id="app-layout">
     <nav class="navbar navbar-default navbar-static-top">
