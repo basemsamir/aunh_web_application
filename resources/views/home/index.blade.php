@@ -23,7 +23,8 @@
           				  <th style="text-align:center">الكود</th>
           				  <th style="text-align:center">الأسم</th>
                     <th style="text-align:center">الرقم القومي</th>
-          				  <th style="text-align:center">تحديد</th>
+          				  <th style="text-align:center">عمل زيارة جديدة</th>
+                    <th style="text-align:center">تعديل زيارة</th>
           				</tr>
           				</thead>
           				<tbody>
@@ -72,10 +73,11 @@ $(document).ready(function(){
               { "data": "id" },
               { "data": "name" },
               { "data": "sin" },
-              { "data": "options" },
+              { "data": "patient_options" },
+              { "data": "visit_options" },
           ],
           "columnDefs": [
-              { "targets": [3], "searchable": false, "orderable": false, "visible": true }
+              { "targets": [3,4], "searchable": false, "orderable": false, "visible": true }
           ]
 
       });
@@ -177,7 +179,15 @@ $(document).ready(function(){
         $("#datepicker2").datepicker('setDate',today);
     }
   });
-
+  $('#sin').on('change paste',function(){
+      $("#sin").parent().removeClass('has-error');
+      if($("#sin").next().length > 0)
+          $("#sin").next().remove();
+      $("#datepicker").val('');
+      $("#datepicker").change();
+      if( $("#sin").val() != 0)
+        calculateBOD($(this).val());
+  });
 });
 
 // Function accepts numbers only
@@ -194,6 +204,48 @@ function isForteen(event){
 	if(event.target.value.length >= 14)
 		return false;
 	return true;
+}
+// Function calculates the age field
+function calculateBOD(sid){
+	var sid_string=sid;
+	var prifx_year="";
+	if(sid_string[0] == 2)
+		prifx_year="19";
+	else if(sid_string[0] == 3)
+		prifx_year="20";
+	else{
+    $("#sin").parent().addClass('has-error');
+		$("#sin").after('<span class="help-block">الرقم القومي غير صحيح</span>');
+		return;
+	}
+	var year=prifx_year+""+sid_string[1]+""+sid_string[2];
+	var month=sid_string[3]+""+sid_string[4];
+	var day=sid_string[5]+""+sid_string[6];
+	var date=year+"-"+month+"-"+day;
+
+	var birthdate = new Date(date);
+	var today = new Date();
+	var diffYears = today.getFullYear() - birthdate.getFullYear();
+	var diffMonths = today.getMonth() - birthdate.getMonth();
+	var diffDays = today.getDate() - birthdate.getDate();
+	if(diffMonths < 0){
+		diffMonths+=12;
+		diffYears--;
+	}
+	if(diffDays < 0){
+		diffMonths--;
+		diffDays+=30;
+	}
+	if( isNaN(diffYears) || diffYears < 0 || isNaN(diffMonths) || isNaN(diffDays) ){
+		$("#sin").parent().addClass('has-error');
+		$("#sin").after('<span class="help-block">الرقم القومي غير صحيح</span>');
+		return;
+	}
+	else{
+		$("#datepicker").val(year+'-'+month+'-'+day);
+    $('#datepicker').change();
+
+	}
 }
 var proc_device=Array();
 function addProcedure(){

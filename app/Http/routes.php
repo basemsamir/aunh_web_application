@@ -15,6 +15,7 @@ Route::get('/', 'HomeController@index')->name('ris.home');
 Route::post('/create', 'HomeController@store')->name('ris.store');
 Route::get('/{vid}/edit', 'HomeController@edit')->name('ris.edit');
 Route::patch('/{vid}/edit', 'HomeController@update')->name('ris.update');
+Route::get('/show/{id}', 'HomeController@show')->name('ris.show');
 Route::post('ajax/getProcedures','HomeController@ajaxMDeviceProcedures');
 Route::post('ajax/postProcDevice','HomeController@ajaxStoreDeviceProc');
 Route::post('ajax/deleteProcDevice','HomeController@ajaxDeleteDeviceProc');

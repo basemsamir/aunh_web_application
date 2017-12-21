@@ -43,7 +43,7 @@ class HomeController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-				$this->user=User::find(Auth::id());
+		$this->user=User::find(Auth::id());
 
     }
 
@@ -53,18 +53,19 @@ class HomeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function index()
-    {	//dd(Session::get('proc_devices'));
-				Session::forget('proc_devices');
-				$devices= MedicalDevice::lists('name','id');
-				$first_device=MedicalDevice::first();
-				$device_procedures= $first_device->procedures()->lists('procedures.name','procedures.id');
-				$rs_places=$this->user->reservation_places()->get();
-				$rs_places_list=array();
-				foreach($rs_places as $rs_place)
-					$rs_places_list[$rs_place->id]=$rs_place->name;
-				$day_month=$this->day_month_array();
-				$departments=Department::lists('name','id');
-				$ref_doctors=Doctor::lists('name','id');
+    {	
+		//dd(Session::get('proc_devices'));
+		Session::forget('proc_devices');
+		$devices= MedicalDevice::lists('name','id');
+		$first_device=MedicalDevice::first();
+		$device_procedures= $first_device->procedures()->lists('procedures.name','procedures.id');
+		$rs_places=$this->user->reservation_places()->get();
+		$rs_places_list=array();
+		foreach($rs_places as $rs_place)
+			$rs_places_list[$rs_place->id]=$rs_place->name;
+		$day_month=$this->day_month_array();
+		$departments=Department::lists('name','id');
+		$ref_doctors=Doctor::lists('name','id');
 
         return view('home.form.store_reservation',compact('devices','device_procedures','rs_places_list','day_month','departments','ref_doctors'));
     }
@@ -91,6 +92,7 @@ class HomeController extends Controller
 		public function store(ReservationRequest $request){
 
 			$input=$request->all();
+			//dd($input);
 			if(count(Session::get('proc_devices')) == 0)
 				return redirect()->back()->withErrors(array('proc_device'=>'لا يوجد فحوصات تمت حجزها'))->withInput();
 			 DB::beginTransaction();
@@ -98,11 +100,17 @@ class HomeController extends Controller
 
 				$proc_devices=Session::get('proc_devices');
 				$input['sin']=$input['sin']==""?null:$input['sin'];
-				$patient=Patient::create($input);
-
+				if(!isset($input['pid'])){
+					$patient=Patient::create($input);
+					$patient_id=$patient->id;
+				}
+				else{
+					Patient::find($input['pid'])->update($input);
+					$patient_id=$input['pid'];
+				}
 				//dd($proc_devices);
 				$visit=Visit::create([
-					'patient_id'=>$patient->id,
+					'patient_id'=>$patient_id,
 					'entry_id'=>$input['rs_place'],
 					'user_id'=>$this->user->id
 				]);
@@ -113,6 +121,7 @@ class HomeController extends Controller
 		  }
 			catch (\Exception $e){
 				 DB::rollBack();
+				 dd($e);
 				 return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
 			}
 		}
@@ -135,30 +144,31 @@ class HomeController extends Controller
 						'xray_doctor_id'=>$row1[2][3],
 						'user_id'=>$this->user->id
 					]);
-					$this->sendingData($visit,$m_order_item);
+					//$this->sendingData($visit,$m_order_item);
 
 				}
 			}
 		}
 		public function edit($vid)
-	  {
+	  	{
 			Session::forget('proc_devices');
-	    $visit = Visit::find($vid);
+	    	$visit = Visit::find($vid);
 			if(Carbon::parse($visit->created_at)->format('Y-m-d') == Carbon::now()->format('Y-m-d')){
 				$orders= $visit->orders;
+				//dd($orders);
 			}
 			else{
 				$orders= $visit->orders()->whereDate('procedure_date','>',Carbon::now()->format('Y-m-d'))->get();
 			}
-
 			foreach($orders as $order){
+				
 				$medical_device_procedure_id=$order->medical_device_procedure_id;
 				$proc_device=MedicalDeviceProcedure::find($medical_device_procedure_id);
 				$proc_device=$proc_device->medical_device_id."_".$proc_device->procedure_id;
 				Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device,$order->procedure_date,$order->procedure_status,$order->department_id,$order->xray_doctor_id));
 			}
+			//dd(Session::get("proc_devices"));
 			$patient= $visit->patient;
-
 			$age=Carbon::parse($patient->birthdate)->diffInYears(Carbon::now());
 			$devices= MedicalDevice::lists('name','id');
 			$first_device=MedicalDevice::first();
@@ -173,7 +183,7 @@ class HomeController extends Controller
 			$ref_doctors=Doctor::lists('name','id');
 	    return view('home.form.edit_reservation',compact('age','patient','visit','devices','rs_places_list','device_procedures','orders','day_month','departments','ref_doctors'));
 	  }
-		public function update(ReservationRequest $request,$vid)
+	  public function update(ReservationRequest $request,$vid)
 	  {
 			$input=$request->all();
 			if(count(Session::get('proc_devices')) == 0)
@@ -207,6 +217,26 @@ class HomeController extends Controller
 					$m_order_item->delete();
 				}
 		}
+		public function show($id)
+		{
+			Session::forget('proc_devices');
+			$patient= Patient::find($id);
+
+			$age=Carbon::parse($patient->birthdate)->diffInYears(Carbon::now());
+			$devices= MedicalDevice::lists('name','id');
+			$first_device=MedicalDevice::first();
+			$device_procedures= $first_device->procedures()->lists('procedures.name','procedures.id');
+			$rs_places=$this->user->reservation_places()->get();
+			$rs_places_list=array();
+			foreach($rs_places as $rs_place)
+				$rs_places_list[$rs_place->id]=$rs_place->name;
+			//$medical_proc_devices= $visit->orders;
+			$day_month=$this->day_month_array();
+			$departments=Department::lists('name','id');
+			$ref_doctors=Doctor::lists('name','id');
+			$show=true;
+			return view('home.form.edit_reservation',compact('show','age','patient','visit','devices','rs_places_list','device_procedures','orders','day_month','departments','ref_doctors'));
+		}
 		public function ajaxStoreDeviceProc(){
 			if(request()->ajax()){
 				$proc_device=request()->input('proc_device');
@@ -218,7 +248,6 @@ class HomeController extends Controller
 					Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device,$proc_date,$proc_status,$proc_dep,$proc_doc));
 					return response()->json(['success' => 'true']);
 				}
-
 			}
 			else{
 				return abort(404);
@@ -251,11 +280,17 @@ class HomeController extends Controller
 				$columns = array(
 	                            0 =>'id',
 	                            1 =>'name',
-															2 =>'sin',
-	                            3 =>'options',
+								2 =>'sin',
+								3 =>'patient_options',
+								4 =>'visit_options',
 	                        );
 
-				$totalData = Visit::join('patients','patients.id','=','visits.patient_id')->whereDate('visits.created_at','=',date('Y-m-d'))->count();
+				$totalData = Patient::leftJoin('visits','patients.id','=','visits.patient_id')
+									->whereDate('patients.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
+									->orWhereDate('visits.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
+									->orderBy('patients.id','desc')
+									->limit(100)
+									->count();
 
 				$totalFiltered = $totalData;
 
@@ -266,12 +301,13 @@ class HomeController extends Controller
 
 				if(empty(trim($request->input('search.value'))) || trim($request->input('search.value')) == "N")
 				{
-					$patient_visits = Visit::join('patients','patients.id','=','visits.patient_id')
+					$patient_visits = Patient::leftJoin('visits','patients.id','=','visits.patient_id')
+									 ->whereDate('patients.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
+									  ->orWhereDate('visits.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
 									 ->offset($start)
 									 ->limit($limit)
-									 ->orderBy($order,$dir)
+									 ->orderBy($order)
 									 ->select('patients.id','name','sin','visits.id as vid')
-									 ->whereDate('visits.created_at','=',date('Y-m-d'))
 									 ->get();
 				}
 				else {
@@ -279,17 +315,16 @@ class HomeController extends Controller
 					$search = $request->input('search.value');
 					if($search[0] == "N" or $search[0] == "n")
 						$search=substr($search,1);
-					$patient_visits = Visit::join('patients','patients.id','=','visits.patient_id')
+					$patient_visits = Patient::leftJoin('visits','patients.id','=','visits.patient_id')
 									->where('patients.id','LIKE',"%{$search}%")
 									->orWhere('name', 'LIKE',"%{$search}%")
 									->offset($start)
 									->limit($limit)
-									->orderBy($order,$dir)
+									->orderBy($order)
 									->select('patients.id','name','sin','visits.id as vid')
-
 									->get();
 
-					$totalFiltered =  Visit::join('patients','patients.id','=','visits.patient_id')
+					$totalFiltered =  Patient::leftJoin('visits','patients.id','=','visits.patient_id')
 									 ->where('patients.id','LIKE',"%{$search}%")
 									 ->orWhere('name', 'LIKE',"%{$search}%")
 									 ->count();
@@ -300,12 +335,15 @@ class HomeController extends Controller
 				{
 					foreach ($patient_visits as $patient_visit)
 					{
+						$new =  route('ris.show',$patient_visit->id);
 						$edit =  route('ris.edit',$patient_visit->vid);
 
 						$nestedData['id'] = "N".$patient_visit->id;
 						$nestedData['name'] = $patient_visit->name;
 						$nestedData['sin'] = $patient_visit->sin;
-						$nestedData['options'] = "<a href='{$edit}' title='تحديد'  class='btn btn-info'  >
+						$nestedData['patient_options'] = "<a href='{$new}' title='عمل زيارة جديدة'  class='btn btn-success'  >
+												   <i class='fa fa-plus'></i></a>";
+						$nestedData['visit_options'] = "<a href='{$edit}' title='تعديل زيارة'  class='btn btn-info'  >
 												   <i class='fa fa-edit'></i></a>";
 						$data[] = $nestedData;
 

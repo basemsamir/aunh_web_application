@@ -1,6 +1,10 @@
 @extends('home.index')
 @section('forms')
-{!! Form::model($patient,['method'=>'PATCH','id'=>'patient_form','route'=>['ris.update',$visit->id]]) !!}
+@if(!isset($show))
+	{!! Form::model($patient,['method'=>'PATCH','id'=>'patient_form','route'=>['ris.update',$visit->id]]) !!}
+@else
+	{!! Form::model($patient,['route'=>'ris.store']) !!}
+@endif
 @include('home.rad')
 <div class="col-md-6">
 	<div class="panel panel-default" >
@@ -37,6 +41,8 @@
 				   <div class="form-group">
 					 {!! Form::label('الكود',null) !!}
 					 {!! Form::text('id',null,array('class'=>'form-control','disabled','id'=>'pid','placeholder'=>'الكود')) !!}
+					 {!! Form::hidden('pid',$patient->id) !!}
+					 
 					 @if ($errors->has('id'))<span class="help-block">{{ $errors->first('id') }}</span>@endif
 				  </div>
 				   <div class="form-group @if($errors->has('name')) {{ 'has-error'}} @endif">
