@@ -21,8 +21,8 @@ class MedicalOrderItem extends Model
 	public function visit(){
 		return $this->belongsTo('App\Visit');
 	}
-	public function medical_device_proc($value=''){
-			return $this->belongsTo('App\MedicalDeviceProcedure','medical_device_procedure_id');
+	public function medical_device_proc(){
+		return $this->belongsTo('App\MedicalDeviceProcedure','medical_device_procedure_id');
 	}
 	public function department(){
 		return $this->belongsTo('App\Department');

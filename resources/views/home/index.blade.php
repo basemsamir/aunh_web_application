@@ -23,6 +23,8 @@
           				  <th style="text-align:center">الكود</th>
           				  <th style="text-align:center">الأسم</th>
                     <th style="text-align:center">الرقم القومي</th>
+                    <th style="text-align:center">تاريخ الزيارة</th>
+                    <th style="text-align:center">تاريخ أخر فحص تم حجزه</th>
           				  <th style="text-align:center">عمل زيارة جديدة</th>
                     <th style="text-align:center">تعديل زيارة</th>
           				</tr>
@@ -73,11 +75,13 @@ $(document).ready(function(){
               { "data": "id" },
               { "data": "name" },
               { "data": "sin" },
+              { "data": "visit_date" },
+              { "data": "last_proc_date" },
               { "data": "patient_options" },
               { "data": "visit_options" },
           ],
           "columnDefs": [
-              { "targets": [3,4], "searchable": false, "orderable": false, "visible": true }
+              { "targets": [5,6], "searchable": false, "orderable": false, "visible": true }
           ]
 
       });
@@ -302,19 +306,32 @@ function addProcedure(){
 }
 function delete_proc_device(device_id,proc_id){
 
-	var url = "{{ url('ajax/deleteProcDevice') }}";
-
-	$.ajax({
-		type: "POST",
-		url: url,
-		data:{proc_device:device_id+"_"+proc_id,_token:"<?php echo csrf_token(); ?>" },
-		success: function (data) {
-			$('#proc_device_tb #row_'+device_id+'_'+proc_id).remove();
-		},
-		error: function (data) {
-			alert("Error");
-		}
-	});
+  if(confirm('هل تريد الغاء هذا الفحص؟')){
+    var url = "{{ url('ajax/deleteProcDevice') }}";
+    var vid= $('#vid').val();
+    var last_one=false;
+    if($('#proc_device_tb tr').length <= 2)
+      last_one=true;
+    $.ajax({
+      type: "POST",
+      url: url,
+      data:{
+          proc_device:device_id+"_"+proc_id,
+          vid:vid,
+          last_one:last_one,
+          _token:"<?php echo csrf_token(); ?>" },
+      success: function (data) {
+        $('#proc_device_tb #row_'+device_id+'_'+proc_id).remove();
+        if(last_one)
+        {
+          window.location.href="<?php {{ url('/'); }} ?>";
+        }
+      },
+      error: function (data) {
+        alert("Error");
+      }
+    });
+  }
 }
 
 </script>

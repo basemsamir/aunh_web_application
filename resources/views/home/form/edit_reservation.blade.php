@@ -42,7 +42,9 @@
 					 {!! Form::label('الكود',null) !!}
 					 {!! Form::text('id',null,array('class'=>'form-control','disabled','id'=>'pid','placeholder'=>'الكود')) !!}
 					 {!! Form::hidden('pid',$patient->id) !!}
-					 
+					 @if(isset($visit->id))
+					 	{!! Form::hidden('vid',$visit->id,['id'=>'vid']) !!}
+					 @endif
 					 @if ($errors->has('id'))<span class="help-block">{{ $errors->first('id') }}</span>@endif
 				  </div>
 				   <div class="form-group @if($errors->has('name')) {{ 'has-error'}} @endif">

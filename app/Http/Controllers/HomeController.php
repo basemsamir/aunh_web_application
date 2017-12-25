@@ -152,10 +152,11 @@ class HomeController extends Controller
 		public function edit($vid)
 	  	{
 			Session::forget('proc_devices');
-	    	$visit = Visit::find($vid);
+			$visit = Visit::find($vid);
+			if(is_null($visit))
+				return redirect()->action('HomeController@index');
 			if(Carbon::parse($visit->created_at)->format('Y-m-d') == Carbon::now()->format('Y-m-d')){
 				$orders= $visit->orders;
-				//dd($orders);
 			}
 			else{
 				$orders= $visit->orders()->whereDate('procedure_date','>',Carbon::now()->format('Y-m-d'))->get();
@@ -186,8 +187,9 @@ class HomeController extends Controller
 	  public function update(ReservationRequest $request,$vid)
 	  {
 			$input=$request->all();
-			if(count(Session::get('proc_devices')) == 0)
+			if(count(Session::get('proc_devices')) == 0){
 				return redirect()->back()->withErrors(array('proc_device'=>'لا يوجد فحوصات تمت حجزها'))->withInput();
+			}
 			DB::beginTransaction();
 			try{
 				$visit=Visit::find($vid);
@@ -197,7 +199,7 @@ class HomeController extends Controller
 				$visit->update(array('entry_id'=>$input['rs_place']));
 				$orders=$visit->orders;
 				// call function for canceling orders //
-				$this->cancel_rad($orders,$visit);
+				//$this->cancel_rad($orders,$visit);
 				// call function for sending orders //
 				$this->send_rad($proc_devices,$visit);
 				Session::forget('proc_devices');
@@ -209,13 +211,18 @@ class HomeController extends Controller
 				return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
 			}
 		}
-		private function cancel_rad($orders,$visit)
+		private function cancel_rad($order,$last_order_status)
 		{
-				foreach($orders as $order){
-					$m_order_item=MedicalOrderItem::find($order->id);
-					$this->sendingData($visit,$m_order_item,'cancel');
-					$m_order_item->delete();
-				}
+			try{
+				//$this->sendingData($order->visit,$m_order_item,'cancel');
+				if($last_order_status)
+					$order->visit->delete();
+				$order->delete();
+			}
+			catch(\Exception $e){
+				DB::rollBack();
+				return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
+			}
 		}
 		public function show($id)
 		{
@@ -256,8 +263,21 @@ class HomeController extends Controller
 		public function ajaxDeleteDeviceProc(){
 			if(request()->ajax()){
 				$proc_device=request()->input('proc_device');
+				$proc_device_arr=explode('_',request()->input('proc_device'));
 				if($proc_device != ""){
-					Session::pull("proc_devices.$proc_device");
+					$proc_device=Session::pull("proc_devices.$proc_device");
+					if(request()->input('vid')){
+						$visit=Visit::find(request()->input('vid'));
+						$orders=$visit->orders;
+						foreach ($orders as $order) {
+							if($order->medical_device_proc->medical_device_id==$proc_device_arr[0]
+								&& $order->medical_device_proc->procedure_id==$proc_device_arr[1])
+							{
+								// call function for canceling orders //
+								$this->cancel_rad($order,request()->input('last_one'));
+							}
+						}
+					}
 				}
 				return response()->json(['success' => 'true']);
 			}
@@ -281,8 +301,10 @@ class HomeController extends Controller
 	                            0 =>'id',
 	                            1 =>'name',
 								2 =>'sin',
-								3 =>'patient_options',
-								4 =>'visit_options',
+								3 =>'visit_date',
+								4 =>'last_proc_date',
+								5 =>'patient_options',
+								6 =>'visit_options',
 	                        );
 
 				$totalData = Patient::leftJoin('visits','patients.id','=','visits.patient_id')
@@ -303,11 +325,15 @@ class HomeController extends Controller
 				{
 					$patient_visits = Patient::leftJoin('visits','patients.id','=','visits.patient_id')
 									 ->whereDate('patients.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
-									  ->orWhereDate('visits.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
+									 ->orWhereDate('visits.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
 									 ->offset($start)
 									 ->limit($limit)
 									 ->orderBy($order)
-									 ->select('patients.id','name','sin','visits.id as vid')
+									 ->select('patients.id','name','sin','visits.created_at','visits.id as vid',
+									 DB::raw('(select count(*) from medical_order_items where medical_order_items.visit_id= `visits`.`id`
+									 and date(`procedure_date`) >= CURRENT_DATE() ) as procs_count'),
+									 DB::raw('(select max(procedure_date) from medical_order_items where medical_order_items.visit_id= `visits`.`id`
+									 and date(`procedure_date`) >= CURRENT_DATE() ) as last_proc_date'))
 									 ->get();
 				}
 				else {
@@ -316,15 +342,21 @@ class HomeController extends Controller
 					if($search[0] == "N" or $search[0] == "n")
 						$search=substr($search,1);
 					$patient_visits = Patient::leftJoin('visits','patients.id','=','visits.patient_id')
+									->leftJoin('medical_order_items','medical_order_items.visit_id','=','visits.id')
 									->where('patients.id','LIKE',"%{$search}%")
 									->orWhere('name', 'LIKE',"%{$search}%")
 									->offset($start)
 									->limit($limit)
 									->orderBy($order)
-									->select('patients.id','name','sin','visits.id as vid')
+									->select('patients.id','name','sin','visits.created_at','visits.id as vid',
+									DB::raw('(select count(*) from medical_order_items where medical_order_items.visit_id= `visits`.`id`
+									and date(`procedure_date`) >= CURRENT_DATE() ) as procs_count'),
+									DB::raw('(select max(procedure_date) from medical_order_items where medical_order_items.visit_id= `visits`.`id`
+									and date(`procedure_date`) >= CURRENT_DATE() ) as last_proc_date'))
 									->get();
 
 					$totalFiltered =  Patient::leftJoin('visits','patients.id','=','visits.patient_id')
+									 ->leftJoin('medical_order_items','medical_order_items.visit_id','=','visits.id')
 									 ->where('patients.id','LIKE',"%{$search}%")
 									 ->orWhere('name', 'LIKE',"%{$search}%")
 									 ->count();
@@ -341,10 +373,22 @@ class HomeController extends Controller
 						$nestedData['id'] = "N".$patient_visit->id;
 						$nestedData['name'] = $patient_visit->name;
 						$nestedData['sin'] = $patient_visit->sin;
-						$nestedData['patient_options'] = "<a href='{$new}' title='عمل زيارة جديدة'  class='btn btn-success'  >
-												   <i class='fa fa-plus'></i></a>";
-						$nestedData['visit_options'] = "<a href='{$edit}' title='تعديل زيارة'  class='btn btn-info'  >
-												   <i class='fa fa-edit'></i></a>";
+						$nestedData['visit_date'] =is_null($patient_visit->created_at)?"":Carbon::parse($patient_visit->created_at)->format('Y-m-d');
+						$nestedData['last_proc_date'] =is_null($patient_visit->last_proc_date)?"":Carbon::parse($patient_visit->created_at)->format('Y-m-d');
+						
+						if(!is_null($patient_visit->vid) 
+							&& $patient_visit->procs_count ){
+								$nestedData['visit_options'] = "<a href='{$edit}' title='تعديل زيارة'  class='btn btn-info'  >
+													<i class='fa fa-edit'></i></a>";
+								$nestedData['patient_options']=""; 
+							}
+							
+						else{
+							$nestedData['patient_options'] = "<a href='{$new}' title='عمل زيارة جديدة'  class='btn btn-success'  >
+													<i class='fa fa-plus'></i></a>";
+							$nestedData['visit_options']="";	
+						}
+							
 						$data[] = $nestedData;
 
 					}
