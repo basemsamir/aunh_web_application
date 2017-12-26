@@ -68,27 +68,26 @@
                     <th style="text-align:center">حالة الفحص</th>
                     <th style="text-align:center">القسم</th>
                     <th style="text-align:center">طبيب الأشعة</th>
-          				  <th style="text-align:center">تحديد</th>
           				</tr>
           				</thead>
           				<tbody>
 
                       @foreach($orders as $order)
-                      <tr>
-                        <td>{{ 'N'.$order->id }}</td>
-                        <td>{{  $order->name }}</td>
-                        <td>{{  $order->sin }}</td>
-                        <td>{{ $order->birthdate}}</td>
-                        <td>{{  $order->address }}</td>
-                        <td>{{  $order->procedure_date }}</td>
-                        <td>{{  $order->dev_name }}</td>
-                        <td>{{  $order->proc_name }}</td>
-                        <td>{{  $order->procedure_status }}</td>
-                        <td>{{  isset($order->department->name)?$order->department->name:"" }}</td>
-                        <td>{{   isset($order->ref_doctor->name)?$order->ref_doctor->name:"" }}</td>
-                        <td><a href='{{ route("ris.edit",$order->vid) }}' title='تحديد'  class='btn btn-info'  >
-            												   <i class='fa fa-edit'></i></a></td>
-                      </tr>
+                        @if(!is_null($order->visit))
+                          <tr>
+                            <td>{{ 'N'.$order->visit->patient->id }}</td>
+                            <td>{{  $order->visit->patient->name }}</td>
+                            <td>{{  $order->visit->patient->sin }}</td>
+                            <td>{{ $order->visit->patient->birthdate}}</td>
+                            <td>{{  $order->visit->patient->address }}</td>
+                            <td>{{  $order->procedure_date }}</td>
+                            <td>{{  $order->medical_device_proc->device_order_item->name }}</td>
+                            <td>{{  $order->medical_device_proc->proc_order_item->name }}</td>
+                            <td>{{  $order->procedure_status }}</td>
+                            <td>{{  $order->department->name }}</td>
+                            <td>{{  $order->ref_doctor->name }}</td>
+                          </tr>
+                        @endif
                       @endforeach
           				</tbody>
 			          </table>
@@ -101,6 +100,12 @@
 @section('javascript')
 <script type="text/javascript">
   $(document).ready(function(){
+      if($("#date_selection").val() == "date_selected") {
+          toggleDisabledDatepicker(false);
+      }
+      else{
+         toggleDisabledDatepicker(true);
+      }
       $("#datepicker").datepicker({
         format:"yyyy-mm-dd",
         startDate: '-100y',
@@ -121,15 +126,25 @@
       $("#date_selection").change(function(){
 
         if($(this).val()=="date_selected"){
-            $("#datepicker").removeAttr('disabled');
-            $("#datepicker2").removeAttr('disabled');
+            toggleDisabledDatepicker(false);
         }
         else{
-          $("#datepicker").attr('disabled',true);
-          $("#datepicker2").attr('disabled',true);
+           toggleDisabledDatepicker(true);
         }
       });
+     
   });
+function toggleDisabledDatepicker(disabled){
+  if(!disabled){
+    $("#datepicker").removeAttr('disabled');
+    $("#datepicker2").removeAttr('disabled');
+  }
+  else{
+    $("#datepicker").attr('disabled',true);
+    $("#datepicker2").attr('disabled',true);
+  }
+ 
+}
 
 </script>
 @stop

@@ -23,7 +23,7 @@
           				  <th style="text-align:center">الكود</th>
           				  <th style="text-align:center">الأسم</th>
                     <th style="text-align:center">الرقم القومي</th>
-                    <th style="text-align:center">تاريخ الزيارة</th>
+                    <th style="text-align:center">تاريخ  اخر زيارة</th>
                     <th style="text-align:center">تاريخ أخر فحص تم حجزه</th>
           				  <th style="text-align:center">عمل زيارة جديدة</th>
                     <th style="text-align:center">تعديل زيارة</th>
@@ -293,38 +293,38 @@ function addProcedure(){
 											'<td>'+$("#device option:selected").text()+'</td>'+
 											'<td>'+$("#procedure_name option:selected").text()+'</td>'+
                       '<td>'+$("#datepicker2").val()+'</td>'+
-											'<td>'+'<a nohref class="btn btn-danger" onclick="delete_proc_device('+$("#device option:selected").val()+","+$("#procedure_name option:selected").val()+')"><i class="fa fa-close"></i></a>'+'</td>'+
+											'<td>'+'<a nohref class="btn btn-danger" onclick="delete_proc_device('+$("#device option:selected").val()+","+$("#procedure_name option:selected").val()+",false"+')"><i class="fa fa-close"></i></a>'+'</td>'+
 										   '</tr>');
 			},
 			error: function (data) {
 				alert("Error");
 			}
 		});
-
 	}
-
 }
-function delete_proc_device(device_id,proc_id){
+function delete_proc_device(device_id,proc_id,existrow=true){
 
   if(confirm('هل تريد الغاء هذا الفحص؟')){
     var url = "{{ url('ajax/deleteProcDevice') }}";
     var vid= $('#vid').val();
     var last_one=false;
-    if($('#proc_device_tb tr').length <= 2)
+    if($('#proc_device_tb tr').length < 3)
       last_one=true;
+   // alert($('#proc_device_tb tr').length);
     $.ajax({
       type: "POST",
       url: url,
       data:{
           proc_device:device_id+"_"+proc_id,
           vid:vid,
+          existrow:existrow,
           last_one:last_one,
           _token:"<?php echo csrf_token(); ?>" },
       success: function (data) {
         $('#proc_device_tb #row_'+device_id+'_'+proc_id).remove();
-        if(last_one)
+        if(last_one && existrow)
         {
-          window.location.href="<?php {{ url('/'); }} ?>";
+           window.location.href="<?php {{ url('/'); }} ?>";
         }
       },
       error: function (data) {

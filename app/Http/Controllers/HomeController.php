@@ -101,16 +101,14 @@ class HomeController extends Controller
 				$proc_devices=Session::get('proc_devices');
 				$input['sin']=$input['sin']==""?null:$input['sin'];
 				if(!isset($input['pid'])){
-					$patient=Patient::create($input);
-					$patient_id=$patient->id;
+					$patient= new Patient($input);
 				}
 				else{
-					Patient::find($input['pid'])->update($input);
-					$patient_id=$input['pid'];
+					$patient=Patient::find($input['pid']);
+					$patient->update($input);
 				}
 				//dd($proc_devices);
-				$visit=Visit::create([
-					'patient_id'=>$patient_id,
+				$visit=$patient->visits()->create([
 					'entry_id'=>$input['rs_place'],
 					'user_id'=>$this->user->id
 				]);
@@ -132,20 +130,21 @@ class HomeController extends Controller
 			{
 				foreach($row as $row1)
 				{
-					$procedure=Procedure::find($row1[0][0]);
-					$medical_device_procedure=$procedure->devices()->where('medical_device_id',$row1[1][0])->first();
+					if(!$row1[2][4]){
+						$procedure=Procedure::find($row1[0][0]);
+						$medical_device_procedure=$procedure->devices()->where('medical_device_id',$row1[1][0])->first();
 
-					$m_order_item=MedicalOrderItem::create([
-						'visit_id'=>$visit->id,
-						'medical_device_procedure_id'=>$medical_device_procedure->pivot->id,
-						'procedure_status'=>$row1[2][1],
-						'procedure_date'=>$row1[2][0],
-						'department_id'=>$row1[2][2],
-						'xray_doctor_id'=>$row1[2][3],
-						'user_id'=>$this->user->id
-					]);
-					//$this->sendingData($visit,$m_order_item);
-
+						$m_order_item=MedicalOrderItem::create([
+							'visit_id'=>$visit->id,
+							'medical_device_procedure_id'=>$medical_device_procedure->pivot->id,
+							'procedure_status'=>$row1[2][1],
+							'procedure_date'=>$row1[2][0],
+							'department_id'=>$row1[2][2],
+							'xray_doctor_id'=>$row1[2][3],
+							'user_id'=>$this->user->id
+						]);
+						//$this->sendingData($visit,$m_order_item);
+					}
 				}
 			}
 		}
@@ -155,18 +154,20 @@ class HomeController extends Controller
 			$visit = Visit::find($vid);
 			if(is_null($visit))
 				return redirect()->action('HomeController@index');
+				//dd($visit->orders);
 			if(Carbon::parse($visit->created_at)->format('Y-m-d') == Carbon::now()->format('Y-m-d')){
 				$orders= $visit->orders;
 			}
 			else{
-				$orders= $visit->orders()->whereDate('procedure_date','>',Carbon::now()->format('Y-m-d'))->get();
+				$orders= $visit->orders()->whereDate('procedure_date','=',Carbon::now()->format('Y-m-d'))->get();
 			}
+			
 			foreach($orders as $order){
 				
 				$medical_device_procedure_id=$order->medical_device_procedure_id;
 				$proc_device=MedicalDeviceProcedure::find($medical_device_procedure_id);
 				$proc_device=$proc_device->medical_device_id."_".$proc_device->procedure_id;
-				Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device,$order->procedure_date,$order->procedure_status,$order->department_id,$order->xray_doctor_id));
+				Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device,$order->procedure_date,$order->procedure_status,$order->department_id,$order->xray_doctor_id,true));
 			}
 			//dd(Session::get("proc_devices"));
 			$patient= $visit->patient;
@@ -214,14 +215,17 @@ class HomeController extends Controller
 		private function cancel_rad($order,$last_order_status)
 		{
 			try{
-				//$this->sendingData($order->visit,$m_order_item,'cancel');
-				if($last_order_status)
-					$order->visit->delete();
+				if($last_order_status == "true"){
+					$visit=$order->visit;
+					if($visit->orders()->count() == 1)
+						$visit->delete();
+				}
 				$order->delete();
+				return response()->json(['success' => true]);
 			}
 			catch(\Exception $e){
 				DB::rollBack();
-				return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
+				return response()->json(['success' => false]);
 			}
 		}
 		public function show($id)
@@ -263,10 +267,13 @@ class HomeController extends Controller
 		public function ajaxDeleteDeviceProc(){
 			if(request()->ajax()){
 				$proc_device=request()->input('proc_device');
-				$proc_device_arr=explode('_',request()->input('proc_device'));
+				$proc_device_arr=explode('_',$proc_device);
+				
 				if($proc_device != ""){
 					$proc_device=Session::pull("proc_devices.$proc_device");
-					if(request()->input('vid')){
+					//dd();
+					if(request()->input('vid') && request()->input('existrow') ){
+						
 						$visit=Visit::find(request()->input('vid'));
 						$orders=$visit->orders;
 						foreach ($orders as $order) {
@@ -274,12 +281,12 @@ class HomeController extends Controller
 								&& $order->medical_device_proc->procedure_id==$proc_device_arr[1])
 							{
 								// call function for canceling orders //
-								$this->cancel_rad($order,request()->input('last_one'));
+								return $this->cancel_rad($order,request()->input('last_one'));
 							}
 						}
 					}
 				}
-				return response()->json(['success' => 'true']);
+				
 			}
 			else{
 				return abort(404);
@@ -308,9 +315,12 @@ class HomeController extends Controller
 	                        );
 
 				$totalData = Patient::leftJoin('visits','patients.id','=','visits.patient_id')
+								    ->leftJoin('medical_order_items','medical_order_items.visit_id','=','visits.id')
 									->whereDate('patients.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
 									->orWhereDate('visits.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
+									->orWhereDate('medical_order_items.procedure_date','=',\Carbon\Carbon::today()->format('Y-m-d'))
 									->orderBy('patients.id','desc')
+									->groupBy('visits.id')
 									->limit(100)
 									->count();
 
@@ -324,8 +334,10 @@ class HomeController extends Controller
 				if(empty(trim($request->input('search.value'))) || trim($request->input('search.value')) == "N")
 				{
 					$patient_visits = Patient::leftJoin('visits','patients.id','=','visits.patient_id')
+									 ->leftJoin('medical_order_items','medical_order_items.visit_id','=','visits.id')
 									 ->whereDate('patients.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
 									 ->orWhereDate('visits.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
+									 ->orWhereDate('medical_order_items.procedure_date','=',\Carbon\Carbon::today()->format('Y-m-d'))
 									 ->offset($start)
 									 ->limit($limit)
 									 ->orderBy($order)
@@ -334,6 +346,7 @@ class HomeController extends Controller
 									 and date(`procedure_date`) >= CURRENT_DATE() ) as procs_count'),
 									 DB::raw('(select max(procedure_date) from medical_order_items where medical_order_items.visit_id= `visits`.`id`
 									 and date(`procedure_date`) >= CURRENT_DATE() ) as last_proc_date'))
+									 ->groupBy('visits.id')
 									 ->get();
 				}
 				else {
@@ -353,12 +366,14 @@ class HomeController extends Controller
 									and date(`procedure_date`) >= CURRENT_DATE() ) as procs_count'),
 									DB::raw('(select max(procedure_date) from medical_order_items where medical_order_items.visit_id= `visits`.`id`
 									and date(`procedure_date`) >= CURRENT_DATE() ) as last_proc_date'))
+									->groupBy('visits.id')
 									->get();
 
 					$totalFiltered =  Patient::leftJoin('visits','patients.id','=','visits.patient_id')
 									 ->leftJoin('medical_order_items','medical_order_items.visit_id','=','visits.id')
 									 ->where('patients.id','LIKE',"%{$search}%")
 									 ->orWhere('name', 'LIKE',"%{$search}%")
+									 ->groupBy('visits.id')
 									 ->count();
 				}
 
@@ -374,7 +389,7 @@ class HomeController extends Controller
 						$nestedData['name'] = $patient_visit->name;
 						$nestedData['sin'] = $patient_visit->sin;
 						$nestedData['visit_date'] =is_null($patient_visit->created_at)?"":Carbon::parse($patient_visit->created_at)->format('Y-m-d');
-						$nestedData['last_proc_date'] =is_null($patient_visit->last_proc_date)?"":Carbon::parse($patient_visit->created_at)->format('Y-m-d');
+						$nestedData['last_proc_date'] =is_null($patient_visit->last_proc_date)?"":Carbon::parse($patient_visit->last_proc_date)->format('Y-m-d');
 						
 						if(!is_null($patient_visit->vid) 
 							&& $patient_visit->procs_count ){
@@ -409,72 +424,55 @@ class HomeController extends Controller
 		}
 		public function search($value='')
 		{
-				$orders=MedicalOrderItem::join('visits','visits.id','=','medical_order_items.visit_id')
-															->join('patients','patients.id','=','visits.patient_id')
-															->join('medical_device_procedure','medical_device_procedure.id','=','medical_order_items.medical_device_procedure_id')
-															->join('medical_devices','medical_devices.id','=','medical_device_procedure.medical_device_id')
-															->join('procedures','procedures.id','=','medical_device_procedure.procedure_id')
-															->select('visits.id as vid','patients.id','patients.name','sin','birthdate','address','procedure_date','procedure_status'
-																			,'medical_devices.name as dev_name','procedures.name as proc_name')
-
-								  ->whereDate('medical_order_items.created_at','=',Carbon::now()->format('Y-m-d'))
-									->get();
-
+				$orders=MedicalOrderItem::with('visit','visit.patient','medical_device_proc.device_order_item',
+											   'medical_device_proc.proc_order_item','department','ref_doctor')
+								 		 ->whereDate('medical_order_items.created_at','=',Carbon::now()->format('Y-m-d'))
+										 ->get();
 				$devices= MedicalDevice::lists('name','id');
 				$patient_active='true';
 				return view('home.patients_table',compact('orders','devices','patient_active'));
 		}
 		public function post_search()
 		{
-			# code...
 			$input=request()->all();
-			$id=$input['pid'];
-			$orders=MedicalOrderItem::join('visits','visits.id','=','medical_order_items.visit_id')
-															->join('patients','patients.id','=','visits.patient_id')
-															->join('medical_device_procedure','medical_device_procedure.id','=','medical_order_items.medical_device_procedure_id')
-															->join('medical_devices','medical_devices.id','=','medical_device_procedure.medical_device_id')
-															->join('procedures','procedures.id','=','medical_device_procedure.procedure_id')
-															->where(function($query) use($input){
+			$orders=MedicalOrderItem::with('visit','medical_device_proc.proc_order_item','department','ref_doctor')
+									->whereHas('visit.patient',function($query) use($input){
+									if($input['pid'] != ""){
+										if($input['pid'][0] == "N" || $input['pid'][0] == "n")
+											$input['pid']=substr($input['pid'],1);
+										$query->where('id',$input['pid']);
+									}
+									elseif($input['name'] != "")
+										$query->where('name','like',"%$input[name]%");
 
-																		switch ($input['date_selection']) {
-																			case 'today':
-																				$query->whereDate('medical_order_items.created_at','=',Carbon::now()->format('Y-m-d'));
-																				break;
-																			case 'yestarday':
-																				$query->whereDate('medical_order_items.created_at','=',Carbon::yesterday()->format('Y-m-d'));
-																				break;
-																			case 'last_week':
-																				$query->whereBetween('medical_order_items.created_at',[Carbon::now()->subWeek()->format('Y-m-d'),Carbon::now()->format('Y-m-d')]);
-																				break;
-																			case 'date_selected':
-																				if($input['duration_from']!="" && $input['duration_to'] !="")
-																					$query->whereBetween('medical_order_items.created_at',[$input['duration_from'],$input['duration_to']]);
-																				break;
-																			default:
-																				# code...
-																				break;
-																		}
-																})
-															->where(function($query) use($input)
-															{
-																# code...
-																	if($input['pid'] != ""){
-																		if($input['pid'][0] == "N" || $input['pid'][0] == "n")
-																			$input['pid']=substr($input['pid'],1);
-																		$query->where('patients.id',$input['pid']);
-																	}
-
-																	elseif($input['name'] != "")
-																		$query->where('patients.name','like',"%$input[name]%");
-
-																	if(isset($input['devices']) && count($input['devices']) > 0)
-																	{
-																		$query->whereIn('medical_devices.id',$input['devices']);
-																	}
-															})
-															->select('visits.id as vid','patients.id','patients.name','sin','birthdate','address','procedure_date','procedure_status'
-																			,'medical_devices.name as dev_name','procedures.name as proc_name')
-															->get();
+									})
+									->whereHas('medical_device_proc.device_order_item',function($query) use($input){
+										if(isset($input['devices']) && count($input['devices']) > 0)
+										{
+											$query->whereIn('id',$input['devices']);
+										}
+									})
+									->where(function($query) use($input){
+										switch ($input['date_selection']) {
+											case 'today':
+												$query->whereDate('medical_order_items.created_at','=',Carbon::now()->format('Y-m-d'));
+												break;
+											case 'yestarday':
+												$query->whereDate('medical_order_items.created_at','=',Carbon::yesterday()->format('Y-m-d'));
+												break;
+											case 'last_week':
+												$query->whereBetween('medical_order_items.created_at',[Carbon::now()->subWeek()->format('Y-m-d'),Carbon::now()->format('Y-m-d')]);
+												break;
+											case 'date_selected':
+												if($input['duration_from']!="" && $input['duration_to'] !="")
+													$query->whereBetween('medical_order_items.created_at',[$input['duration_from'],$input['duration_to']]);
+												break;
+											default:
+												# code...
+												break;
+										}
+									})
+									->get();
 
 			$devices= MedicalDevice::lists('name','id');
 			$patient_active='true';

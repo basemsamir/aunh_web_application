@@ -21,7 +21,7 @@
 					</div>
 					<div class="form-group">
 						{!! Form::label('السن',null,array('class'=>'required')) !!}
-						{!! Form::text('year_age',$age,array('placeholder'=>'السن','class'=>'form-control','id'=>'year_age','onkeypress'=>'return isNumber(event)')) !!}
+						{!! Form::text('year_age',null,array('placeholder'=>'السن','class'=>'form-control','id'=>'year_age','onkeypress'=>'return isNumber(event)')) !!}
 						@if($errors->has('year_age'))<span class="help-block">{{$errors->first('year_age')}}</span>@endif
 					</div>
 				   <div class="form-group @if($errors->has('address')) {{ 'has-error'}} @endif">
