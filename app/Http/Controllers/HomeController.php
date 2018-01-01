@@ -95,13 +95,13 @@ class HomeController extends Controller
 			//dd($input);
 			if(count(Session::get('proc_devices')) == 0)
 				return redirect()->back()->withErrors(array('proc_device'=>'لا يوجد فحوصات تمت حجزها'))->withInput();
-			 DB::beginTransaction();
-			 try{
+			DB::beginTransaction();
+			try{
 
 				$proc_devices=Session::get('proc_devices');
 				$input['sin']=$input['sin']==""?null:$input['sin'];
 				if(!isset($input['pid'])){
-					$patient= new Patient($input);
+					$patient= Patient::create($input);
 				}
 				else{
 					$patient=Patient::find($input['pid']);
@@ -112,14 +112,20 @@ class HomeController extends Controller
 					'entry_id'=>$input['rs_place'],
 					'user_id'=>$this->user->id
 				]);
-				$this->send_rad($proc_devices,$visit);
+				try{
+					$this->send_rad($proc_devices,$visit);
+				}
+				catch (\Exception $e){
+					DB::rollBack();
+					return redirect()->back()->withFailureMessage(Lang::get('flash_messages.wsdl_error'));
+				}
 				Session::forget('proc_devices');
 				DB::commit();
 				return redirect()->back()->withSuccessMessage(Lang::get('flash_messages.success'));
-		  }
+		  	}
 			catch (\Exception $e){
 				 DB::rollBack();
-				 dd($e);
+				 
 				 return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
 			}
 		}
@@ -143,7 +149,7 @@ class HomeController extends Controller
 							'xray_doctor_id'=>$row1[2][3],
 							'user_id'=>$this->user->id
 						]);
-						//$this->sendingData($visit,$m_order_item);
+						$this->sendingData($visit,$m_order_item);
 					}
 				}
 			}
@@ -202,7 +208,13 @@ class HomeController extends Controller
 				// call function for canceling orders //
 				//$this->cancel_rad($orders,$visit);
 				// call function for sending orders //
-				$this->send_rad($proc_devices,$visit);
+				try{
+					$this->send_rad($proc_devices,$visit);
+				}
+				catch (\Exception $e){
+					DB::rollBack();
+					return redirect()->back()->withFailureMessage(Lang::get('flash_messages.wsdl_error'));
+				}
 				Session::forget('proc_devices');
 				DB::commit();
 				return redirect()->route('ris.home')->withSuccessMessage(Lang::get('flash_messages.success'));
@@ -215,12 +227,13 @@ class HomeController extends Controller
 		private function cancel_rad($order,$last_order_status)
 		{
 			try{
+				$visit=$order->visit;
 				if($last_order_status == "true"){
-					$visit=$order->visit;
 					if($visit->orders()->count() == 1)
 						$visit->delete();
 				}
 				$order->delete();
+				$this->sendingData($visit,$order,'cancel');
 				return response()->json(['success' => true]);
 			}
 			catch(\Exception $e){
@@ -281,7 +294,13 @@ class HomeController extends Controller
 								&& $order->medical_device_proc->procedure_id==$proc_device_arr[1])
 							{
 								// call function for canceling orders //
-								return $this->cancel_rad($order,request()->input('last_one'));
+								try{
+									return $this->cancel_rad($order,request()->input('last_one'));
+								}
+								catch(\Exception $e){
+									return redirect()->back()->withFailureMessage(Lang::get('flash_messages.wsdl_error'));
+								}
+								
 							}
 						}
 					}
@@ -321,7 +340,6 @@ class HomeController extends Controller
 									->orWhereDate('medical_order_items.procedure_date','=',\Carbon\Carbon::today()->format('Y-m-d'))
 									->orderBy('patients.id','desc')
 									->groupBy('visits.id')
-									->limit(100)
 									->count();
 
 				$totalFiltered = $totalData;
@@ -354,27 +372,26 @@ class HomeController extends Controller
 					$search = $request->input('search.value');
 					if($search[0] == "N" or $search[0] == "n")
 						$search=substr($search,1);
-					$patient_visits = Patient::leftJoin('visits','patients.id','=','visits.patient_id')
-									->leftJoin('medical_order_items','medical_order_items.visit_id','=','visits.id')
-									->where('patients.id','LIKE',"%{$search}%")
-									->orWhere('name', 'LIKE',"%{$search}%")
-									->offset($start)
-									->limit($limit)
-									->orderBy($order)
-									->select('patients.id','name','sin','visits.created_at','visits.id as vid',
-									DB::raw('(select count(*) from medical_order_items where medical_order_items.visit_id= `visits`.`id`
-									and date(`procedure_date`) >= CURRENT_DATE() ) as procs_count'),
-									DB::raw('(select max(procedure_date) from medical_order_items where medical_order_items.visit_id= `visits`.`id`
-									and date(`procedure_date`) >= CURRENT_DATE() ) as last_proc_date'))
-									->groupBy('visits.id')
-									->get();
+					
+					$query=
+					$patient_visits = Patient::where('patients.id','LIKE',"%{$search}%")
+											->orWhere('name', 'LIKE',"%{$search}%")									
+											->select('patients.id','name','sin',
+											DB::raw('(select max(id) from visits where patient_id=patients.id) as vid '),
+											DB::raw('(select max(created_at) from visits where patient_id=patients.id) as created_at '),
+											DB::raw('(select count(*) from medical_order_items where medical_order_items.visit_id= vid
+											and date(`procedure_date`) >= CURRENT_DATE() ) as procs_count'),
+											DB::raw('(select max(procedure_date) from medical_order_items where medical_order_items.visit_id= vid
+											and date(`procedure_date`) >= CURRENT_DATE() ) as last_proc_date'))
+											->offset($start)
+											->limit($limit)
+											->orderBy($order)
+											->get();
 
-					$totalFiltered =  Patient::leftJoin('visits','patients.id','=','visits.patient_id')
-									 ->leftJoin('medical_order_items','medical_order_items.visit_id','=','visits.id')
-									 ->where('patients.id','LIKE',"%{$search}%")
-									 ->orWhere('name', 'LIKE',"%{$search}%")
-									 ->groupBy('visits.id')
-									 ->count();
+					$totalData =  Patient::where('patients.id','LIKE',"%{$search}%")
+									 	->orWhere('name', 'LIKE',"%{$search}%")
+									 	->count();
+					$totalFiltered=$totalData;
 				}
 
 				$data = array();
@@ -393,14 +410,12 @@ class HomeController extends Controller
 						
 						if(!is_null($patient_visit->vid) 
 							&& $patient_visit->procs_count ){
-								$nestedData['visit_options'] = "<a href='{$edit}' title='تعديل زيارة'  class='btn btn-info'  >
-													<i class='fa fa-edit'></i></a>";
+								$nestedData['visit_options'] = "<a href='{$edit}' title='تعديل زيارة'  class='btn btn-info' ><i class='fa fa-edit'></i></a>";
 								$nestedData['patient_options']=""; 
 							}
 							
 						else{
-							$nestedData['patient_options'] = "<a href='{$new}' title='عمل زيارة جديدة'  class='btn btn-success'  >
-													<i class='fa fa-plus'></i></a>";
+							$nestedData['patient_options'] = "<a href='{$new}' title='عمل زيارة جديدة'  class='btn btn-success'  ><i class='fa fa-plus'></i></a>";
 							$nestedData['visit_options']="";	
 						}
 							
@@ -550,7 +565,7 @@ class HomeController extends Controller
 			$procedureInfo->LastNamefamilynameDoctor=""; // string
 			$procedureInfo->FirstNameDoctor= $doctor_user->name;  // string
 			//$procedureInfo->MiddleNameDoctor=$names[1]; // string
-
+			
 			$client = new AUNHHL7ServiceService();
 			switch($op){
 				case 'add':

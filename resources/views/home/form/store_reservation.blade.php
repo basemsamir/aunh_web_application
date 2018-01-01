@@ -34,11 +34,6 @@
 				</div>
 				<!-- col-md-6 -->
 				<div class="col-md-6">
-				   <div class="form-group">
-					 {!! Form::label('الكود',null) !!}
-					 {!! Form::text('id',null,array('class'=>'form-control','id'=>'pid','placeholder'=>'الكود','onkeypress'=>'return isNumber(event)')) !!}
-					 @if ($errors->has('id'))<span class="help-block">{{ $errors->first('id') }}</span>@endif
-				  </div>
 				   <div class="form-group @if($errors->has('name')) {{ 'has-error'}} @endif">
 					 {!! Form::label('الأسم',null,array('class'=>'required')) !!}
 					 {!! Form::text('name',null,array('class'=>'form-control','id'=>'name','placeholder'=>'الأسم')) !!}

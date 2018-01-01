@@ -5,7 +5,7 @@
 		<div class="panel-body">
 				<div class="row ">
 						@if($errors->has('proc_device'))
-						<div class="alert alert-danger">
+						<div class="alert alert-danger" id="proc_error_message">
 							{{ $errors->first('proc_device') }}
 						</div>
 						@endif

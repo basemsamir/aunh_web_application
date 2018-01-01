@@ -254,6 +254,7 @@ function calculateBOD(sid){
 var proc_device=Array();
 function addProcedure(){
 
+  $("#proc_error_message").hide();
   show_saving_state=true;
 	var row_id="row_"+$("#device option:selected").val()+"_"+$("#procedure_name option:selected").val();
 	var id=$("#device option:selected").val()+"_"+$("#procedure_name option:selected").val();

@@ -3,7 +3,7 @@
 @if(!isset($show))
 	{!! Form::model($patient,['method'=>'PATCH','id'=>'patient_form','route'=>['ris.update',$visit->id]]) !!}
 @else
-	{!! Form::model($patient,['route'=>'ris.store']) !!}
+	{!! Form::model($patient,['route'=>'ris.store','id'=>'patient_form']) !!}
 @endif
 @include('home.rad')
 <div class="col-md-6">
@@ -40,7 +40,7 @@
 				<div class="col-md-6">
 				   <div class="form-group">
 					 {!! Form::label('الكود',null) !!}
-					 {!! Form::text('id',null,array('class'=>'form-control','disabled','id'=>'pid','placeholder'=>'الكود')) !!}
+					 {!! Form::label('id','N'.$patient->id,array('class'=>'form-control')) !!}
 					 {!! Form::hidden('pid',$patient->id) !!}
 					 @if(isset($visit->id))
 					 	{!! Form::hidden('vid',$visit->id,['id'=>'vid']) !!}
