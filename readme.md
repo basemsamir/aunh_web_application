@@ -2,7 +2,11 @@
 
 AUNH is a Laravel web application which serves a radiology department in xray reservation with limited features.
 
-AUNH contains two modules (xray reservation, administration).
+AUNH have two modules (xray reservation, administration).
+
+AUNH supports Arabic only.
+
+AUNH supports Web service that communicates with HL7 protocol to reserve a procedure on medical device.
 
 ## Security Vulnerabilities
 

@@ -64,6 +64,7 @@ $(document).ready(function(){
   $('#patient_tb').DataTable({
           "processing": true,
           "serverSide": true,
+          "deferRender": true,
           "lengthMenu": [10],
           "ajax":{
                    "url": "{{ url('ajax/getPatientsToday') }}",
@@ -81,9 +82,8 @@ $(document).ready(function(){
               { "data": "visit_options" },
           ],
           "columnDefs": [
-              { "targets": [5,6], "searchable": false, "orderable": false, "visible": true }
+              { "targets": [2,3,4,5,6], "searchable": false, "orderable": false, "visible": true }
           ]
-
       });
 
   var today=new Date();
