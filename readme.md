@@ -6,7 +6,7 @@ AUNH have two modules (xray reservation, administration).
 
 AUNH supports Arabic only.
 
-AUNH supports Web service that communicates with HL7 protocol to reserve a procedure on medical device.
+AUNH supports web service that communicates with HL7 protocol to reserve a procedure on medical device.
 
 ## Security Vulnerabilities
 
