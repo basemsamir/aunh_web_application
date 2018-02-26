@@ -22,6 +22,11 @@
                     {!! Form::email('email',null,array('class'=>'form-control')) !!}
                     @if($errors->has('email')) <span class="help-block">{{ $errors->first('email') }}</span> @endif
                   </div>
+                  <div class="form-group @if($errors->has('role_id')) has-error @endif">
+                    {!! Form::label('الدور') !!}
+                    {!! Form::select('role_id',$roles,null,array('class'=>'form-control')) !!}
+                    @if($errors->has('role_id')) <span class="help-block">{{ $errors->first('role_id') }}</span> @endif
+                  </div>
                   <div class="form-group @if($errors->has('password')) has-error @endif">
                     {!! Form::label('كلمة المرور') !!}
                     {!! Form::password('password',['class'=>'form-control']) !!}

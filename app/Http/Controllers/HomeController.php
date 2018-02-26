@@ -33,8 +33,10 @@ use App\Traits\ProcDeviceName;
 
 class HomeController extends Controller
 {
-		use ProcDeviceName;
-		private $user;
+	use ProcDeviceName;
+	private $user;
+	private $role;
+	private $medical_device_category;
     /**
      * Create a new controller instance.
      *
@@ -43,10 +45,19 @@ class HomeController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-		$this->user=User::find(Auth::id());
-
+		$this->user=User::with('role')->where('id',Auth::id())->first();
+		if($this->user){
+			$this->role=$this->user->role->name;
+			switch ($this->role) {
+				case 'Xray':
+					$this->medical_device_category=1;
+					break;
+				case 'Lab':
+					$this->medical_device_category=2;
+					break;
+			}
+		}			
     }
-
     /**
      * Show the application dashboard.
      *
@@ -56,8 +67,16 @@ class HomeController extends Controller
     {	
 		//dd(Session::get('proc_devices'));
 		Session::forget('proc_devices');
-		$devices= MedicalDevice::lists('name','id');
-		$first_device=MedicalDevice::first();
+		$medical_device_category=$this->medical_device_category;
+		$devices= MedicalDevice::whereHas('medical_device_type',function ($query) use ($medical_device_category) {
+									$query->where('medical_device_category_id',$medical_device_category);
+								})
+								->lists('name','id');
+		
+		$first_device=MedicalDevice::whereHas('medical_device_type',function ($query) use ($medical_device_category) {
+										$query->where('medical_device_category_id',$medical_device_category);
+									})
+									->first();
 		$device_procedures= $first_device->procedures()->lists('procedures.name','procedures.id');
 		$rs_places=$this->user->reservation_places()->get();
 		$rs_places_list=array();
@@ -69,126 +88,135 @@ class HomeController extends Controller
 
         return view('home.form.store_reservation',compact('devices','device_procedures','rs_places_list','day_month','departments','ref_doctors'));
     }
-		private function day_month_array()
-		{
-				$monthes=array();
-				$days = array();
-				$monthes[""]=0;
-				$days[""]=0;
-				for($i=1;$i<=11;$i++)
-					$monthes[$i]=$i;
-				for($i=1;$i<=29;$i++)
-					$days[$i]=$i;
-				return array($days,$monthes);
-		}
-		private function getBirthday($day,$month,$year)
-		{
-				# code...
-				$birthdate=strtotime("-".($day==""?0:$day)." day",time());
-				$birthdate=strtotime("-".($month==""?0:$month)." month",$birthdate);
-				$birthdate=strtotime("-".($year==""?0:$year)." year",$birthdate);
-				return date('Y-m-d',$birthdate);
-		}
-		public function store(ReservationRequest $request){
+	private function day_month_array()
+	{
+		$monthes=array();
+		$days = array();
+		$monthes[""]=0;
+		$days[""]=0;
+		for($i=1;$i<=11;$i++)
+			$monthes[$i]=$i;
+		for($i=1;$i<=29;$i++)
+			$days[$i]=$i;
+		return array($days,$monthes);
+	}
+	private function getBirthday($day,$month,$year)
+	{
+		# code...
+		$birthdate=strtotime("-".($day==""?0:$day)." day",time());
+		$birthdate=strtotime("-".($month==""?0:$month)." month",$birthdate);
+		$birthdate=strtotime("-".($year==""?0:$year)." year",$birthdate);
+		return date('Y-m-d',$birthdate);
+	}
+	public function store(ReservationRequest $request){
 
-			$input=$request->all();
-			//dd($input);
-			if(count(Session::get('proc_devices')) == 0)
-				return redirect()->back()->withErrors(array('proc_device'=>'لا يوجد فحوصات تمت حجزها'))->withInput();
-			DB::beginTransaction();
-			try{
+		$input=$request->all();
+		//dd($input);
+		if(count(Session::get('proc_devices')) == 0)
+			return redirect()->back()->withErrors(array('proc_device'=>'لا يوجد فحوصات تمت حجزها'))->withInput();
+		DB::beginTransaction();
+		try{
 
-				$proc_devices=Session::get('proc_devices');
-				$input['sin']=$input['sin']==""?null:$input['sin'];
-				if(!isset($input['pid'])){
-					$patient= Patient::create($input);
-				}
-				else{
-					$patient=Patient::find($input['pid']);
-					$patient->update($input);
-				}
-				//dd($proc_devices);
-				$visit=$patient->visits()->create([
-					'entry_id'=>$input['rs_place'],
-					'user_id'=>$this->user->id
-				]);
-				try{
-					$this->send_rad($proc_devices,$visit);
-				}
-				catch (\Exception $e){
-					DB::rollBack();
-					return redirect()->back()->withFailureMessage(Lang::get('flash_messages.wsdl_error'));
-				}
-				Session::forget('proc_devices');
-				DB::commit();
-				return redirect()->back()->withSuccessMessage(Lang::get('flash_messages.success'));
-		  	}
-			catch (\Exception $e){
-				 DB::rollBack();
-				 
-				 return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
-			}
-		}
-
-		private function send_rad($proc_devices,$visit)
-		{
-			foreach($proc_devices as $row)
-			{
-				foreach($row as $row1)
-				{
-					if(!$row1[2][4]){
-						$procedure=Procedure::find($row1[0][0]);
-						$medical_device_procedure=$procedure->devices()->where('medical_device_id',$row1[1][0])->first();
-
-						$m_order_item=MedicalOrderItem::create([
-							'visit_id'=>$visit->id,
-							'medical_device_procedure_id'=>$medical_device_procedure->pivot->id,
-							'procedure_status'=>$row1[2][1],
-							'procedure_date'=>$row1[2][0],
-							'department_id'=>$row1[2][2],
-							'xray_doctor_id'=>$row1[2][3],
-							'user_id'=>$this->user->id
-						]);
-						$this->sendingData($visit,$m_order_item);
-					}
-				}
-			}
-		}
-		public function edit($vid)
-	  	{
-			Session::forget('proc_devices');
-			$visit = Visit::find($vid);
-			if(is_null($visit))
-				return redirect()->action('HomeController@index');
-				//dd($visit->orders);
-			if(Carbon::parse($visit->created_at)->format('Y-m-d') == Carbon::now()->format('Y-m-d')){
-				$orders= $visit->orders;
+			$proc_devices=Session::get('proc_devices');
+			$input['sin']=$input['sin']==""?null:$input['sin'];
+			if(!isset($input['pid'])){
+				$patient= Patient::create($input);
 			}
 			else{
-				$orders= $visit->orders()->whereDate('procedure_date','=',Carbon::now()->format('Y-m-d'))->get();
+				$patient=Patient::find($input['pid']);
+				$patient->update($input);
 			}
-			
-			foreach($orders as $order){
+			//dd($proc_devices);
+			$visit=$patient->visits()->create([
+				'entry_id'=>$input['rs_place'],
+				'user_id'=>$this->user->id
+			]);
+			try{
+				$this->send_order_item($proc_devices,$visit);
+			}
+			catch (\Exception $e){
+				DB::rollBack();
+				return redirect()->back()->withFailureMessage(Lang::get('flash_messages.wsdl_error'));
+			}
+			Session::forget('proc_devices');
+			DB::commit();
+			return redirect()->back()->withSuccessMessage(Lang::get('flash_messages.success'));
+		}
+		catch (\Exception $e){
+				DB::rollBack();
 				
-				$medical_device_procedure_id=$order->medical_device_procedure_id;
-				$proc_device=MedicalDeviceProcedure::find($medical_device_procedure_id);
-				$proc_device=$proc_device->medical_device_id."_".$proc_device->procedure_id;
-				Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device,$order->procedure_date,$order->procedure_status,$order->department_id,$order->xray_doctor_id,true));
+				return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
+		}
+	}
+
+	private function send_order_item($proc_devices,$visit)
+	{
+		foreach($proc_devices as $row)
+		{
+			foreach($row as $row1)
+			{
+				if(!$row1[2][4]){
+					$procedure=Procedure::find($row1[0][0]);
+					$medical_device_procedure=$procedure->devices()->where('medical_device_id',$row1[1][0])->first();
+
+					$m_order_item=MedicalOrderItem::create([
+						'visit_id'=>$visit->id,
+						'medical_device_procedure_id'=>$medical_device_procedure->pivot->id,
+						'procedure_status'=>$row1[2][1],
+						'procedure_date'=>$row1[2][0],
+						'department_id'=>$row1[2][2],
+						'xray_doctor_id'=>$row1[2][3],
+						'user_id'=>$this->user->id
+					]);
+					if($this->medical_device_category == 1)
+						$this->sendingData($visit,$m_order_item);
+				}
 			}
-			//dd(Session::get("proc_devices"));
-			$patient= $visit->patient;
-			$age=Carbon::parse($patient->birthdate)->diffInYears(Carbon::now());
-			$devices= MedicalDevice::lists('name','id');
-			$first_device=MedicalDevice::first();
-			$device_procedures= $first_device->procedures()->lists('procedures.name','procedures.id');
-			$rs_places=$this->user->reservation_places()->get();
-			$rs_places_list=array();
-			foreach($rs_places as $rs_place)
-				$rs_places_list[$rs_place->id]=$rs_place->name;
-			//$medical_proc_devices= $visit->orders;
-			$day_month=$this->day_month_array();
-			$departments=Department::lists('name','id');
-			$ref_doctors=Doctor::lists('name','id');
+		}
+	}
+	public function edit($vid)
+	{
+		Session::forget('proc_devices');
+		$visit = Visit::find($vid);
+		if(is_null($visit))
+			return redirect()->action('HomeController@index');
+			//dd($visit->orders);
+		if(Carbon::parse($visit->created_at)->format('Y-m-d') == Carbon::now()->format('Y-m-d')){
+			$orders= $visit->orders;
+		}
+		else{
+			$orders= $visit->orders()->whereDate('procedure_date','=',Carbon::now()->format('Y-m-d'))->get();
+		}
+		
+		foreach($orders as $order){
+			
+			$medical_device_procedure_id=$order->medical_device_procedure_id;
+			$proc_device=MedicalDeviceProcedure::find($medical_device_procedure_id);
+			$proc_device=$proc_device->medical_device_id."_".$proc_device->procedure_id;
+			Session::push("proc_devices.$proc_device",$this->_getProcDeviceByID($proc_device,$order->procedure_date,$order->procedure_status,$order->department_id,$order->xray_doctor_id,true));
+		}
+		//dd(Session::get("proc_devices"));
+		$patient= $visit->patient;
+		$age=Carbon::parse($patient->birthdate)->diffInYears(Carbon::now());
+		$medical_device_category=$this->medical_device_category;
+		$devices= MedicalDevice::whereHas('medical_device_type',function ($query) use ($medical_device_category) {
+									$query->where('medical_device_category_id',$medical_device_category);
+								})
+								->lists('name','id');
+		
+		$first_device=MedicalDevice::whereHas('medical_device_type',function ($query) use ($medical_device_category) {
+										$query->where('medical_device_category_id',$medical_device_category);
+									})
+									->first();
+		$device_procedures= $first_device->procedures()->lists('procedures.name','procedures.id');
+		$rs_places=$this->user->reservation_places()->get();
+		$rs_places_list=array();
+		foreach($rs_places as $rs_place)
+			$rs_places_list[$rs_place->id]=$rs_place->name;
+		//$medical_proc_devices= $visit->orders;
+		$day_month=$this->day_month_array();
+		$departments=Department::lists('name','id');
+		$ref_doctors=Doctor::lists('name','id');
 	    return view('home.form.edit_reservation',compact('age','patient','visit','devices','rs_places_list','device_procedures','orders','day_month','departments','ref_doctors'));
 	  }
 	  public function update(ReservationRequest $request,$vid)
@@ -209,7 +237,7 @@ class HomeController extends Controller
 				//$this->cancel_rad($orders,$visit);
 				// call function for sending orders //
 				try{
-					$this->send_rad($proc_devices,$visit);
+					$this->send_order_item($proc_devices,$visit);
 				}
 				catch (\Exception $e){
 					DB::rollBack();
@@ -233,7 +261,8 @@ class HomeController extends Controller
 						$visit->delete();
 				}
 				$order->delete();
-				$this->sendingData($visit,$order,'cancel');
+				if($this->medical_device_category == 1)
+					$this->sendingData($visit,$order,'cancel');
 				return response()->json(['success' => true]);
 			}
 			catch(\Exception $e){
@@ -334,11 +363,17 @@ class HomeController extends Controller
 	                        );
 
 				$totalData = Patient::leftJoin('visits','patients.id','=','visits.patient_id')
-								    ->leftJoin('medical_order_items','medical_order_items.visit_id','=','visits.id')
-									->whereDate('patients.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
-									->orWhereDate('visits.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
-									->orWhereDate('medical_order_items.procedure_date','=',\Carbon\Carbon::today()->format('Y-m-d'))
-									->orderBy('patients.id','desc')
+									->leftJoin('medical_order_items','medical_order_items.visit_id','=','visits.id')
+									->leftJoin('medical_device_procedure','medical_device_procedure.id','=','medical_order_items.medical_device_procedure_id')
+									->leftJoin('medical_devices','medical_devices.id','=','medical_device_procedure.medical_device_id')
+									->leftJoin('medical_device_types','medical_device_types.id','=','medical_devices.medical_device_type_id')
+									->leftJoin('medical_device_categories','medical_device_categories.id','=','medical_device_types.medical_device_category_id')
+									->where('medical_device_categories.id',$this->medical_device_category)
+									 ->where(function($query){
+										$query->whereDate('patients.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
+											  ->orWhereDate('visits.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
+											  ->orWhereDate('medical_order_items.procedure_date','=',\Carbon\Carbon::today()->format('Y-m-d'));
+									 })
 									->groupBy('visits.id')
 									->count();
 
@@ -353,13 +388,20 @@ class HomeController extends Controller
 				{
 					$patient_visits = Patient::leftJoin('visits','patients.id','=','visits.patient_id')
 									 ->leftJoin('medical_order_items','medical_order_items.visit_id','=','visits.id')
-									 ->whereDate('patients.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
-									 ->orWhereDate('visits.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
-									 ->orWhereDate('medical_order_items.procedure_date','=',\Carbon\Carbon::today()->format('Y-m-d'))
+									 ->leftJoin('medical_device_procedure','medical_device_procedure.id','=','medical_order_items.medical_device_procedure_id')
+									 ->leftJoin('medical_devices','medical_devices.id','=','medical_device_procedure.medical_device_id')
+									 ->leftJoin('medical_device_types','medical_device_types.id','=','medical_devices.medical_device_type_id')
+									 ->leftJoin('medical_device_categories','medical_device_categories.id','=','medical_device_types.medical_device_category_id')
+									 ->where('medical_device_categories.id',$this->medical_device_category)
+									 ->where(function($query){
+										$query->whereDate('patients.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
+											  ->orWhereDate('visits.created_at','=',\Carbon\Carbon::today()->format('Y-m-d'))
+											  ->orWhereDate('medical_order_items.procedure_date','=',\Carbon\Carbon::today()->format('Y-m-d'));
+									 })
 									 ->offset($start)
 									 ->limit($limit)
 									 ->orderBy($order)
-									 ->select('patients.id','name','sin','visits.created_at','visits.id as vid',
+									 ->select('patients.id','patients.name','sin','visits.created_at','visits.id as vid',
 									 DB::raw('(select count(*) from medical_order_items where medical_order_items.visit_id= `visits`.`id`
 									 and date(`procedure_date`) >= CURRENT_DATE() ) as procs_count'),
 									 DB::raw('(select max(procedure_date) from medical_order_items where medical_order_items.visit_id= `visits`.`id`
@@ -377,7 +419,9 @@ class HomeController extends Controller
 					$patient_visits = Patient::where('patients.id','LIKE',"%{$search}%")
 											->orWhere('name', 'LIKE',"%{$search}%")									
 											->select('patients.id','name','sin',
-											DB::raw('(select max(id) from visits where patient_id=patients.id) as vid '),
+											DB::raw('(select max(id) from visits 
+											
+											where patient_id=patients.id) as vid '),
 											DB::raw('(select max(created_at) from visits where patient_id=patients.id) as created_at '),
 											DB::raw('(select count(*) from medical_order_items where medical_order_items.visit_id= vid
 											and date(`procedure_date`) >= CURRENT_DATE() ) as procs_count'),
@@ -437,20 +481,28 @@ class HomeController extends Controller
 				return abort(404);
 			}
 		}
-		public function search($value='')
+		public function searchPatientProc($value='')
 		{
-				$orders=MedicalOrderItem::with('visit','visit.patient','medical_device_proc.device_order_item',
-											   'medical_device_proc.proc_order_item','department','ref_doctor')
-								 		 ->whereDate('medical_order_items.created_at','=',Carbon::now()->format('Y-m-d'))
-										 ->get();
-				$devices= MedicalDevice::lists('name','id');
-				$patient_active='true';
-				return view('home.patients_table',compact('orders','devices','patient_active'));
+			$medical_device_category=$this->medical_device_category;
+			$orders=MedicalOrderItem::with('visit','visit.patient','medical_device_proc.device_order_item',
+											'medical_device_proc.proc_order_item','department','ref_doctor')
+										->whereHas('medical_device_proc.device_order_item.medical_device_type.category',function($query) use($medical_device_category){
+											$query->where('id',$medical_device_category);
+										})
+										->whereDate('medical_order_items.created_at','=',Carbon::now()->format('Y-m-d'))
+										->get();
+			$devices=MedicalDevice::lists('name','id');
+			$patients_proc_menu_item_active='true';
+			return view('home.patients_proc_table',compact('orders','devices','patients_proc_menu_item_active'));
 		}
-		public function post_search()
+		public function postSearchPatientProc()
 		{
 			$input=request()->all();
+			$medical_device_category=$this->medical_device_category;
 			$orders=MedicalOrderItem::with('visit','medical_device_proc.proc_order_item','department','ref_doctor')
+									->whereHas('medical_device_proc.device_order_item.medical_device_type.category',function($query) use($medical_device_category){
+										$query->where('id',$medical_device_category);
+									})
 									->whereHas('visit.patient',function($query) use($input){
 									if($input['pid'] != ""){
 										if($input['pid'][0] == "N" || $input['pid'][0] == "n")
@@ -490,8 +542,32 @@ class HomeController extends Controller
 									->get();
 
 			$devices= MedicalDevice::lists('name','id');
-			$patient_active='true';
-			return view('home.patients_table',compact('orders','devices','patient_active'));
+			$patients_proc_menu_item_active='true';
+			return view('home.patients_proc_table',compact('orders','devices','patients_proc_menu_item_active'));
+		}
+		public function searchPatient($value='')
+		{
+			$patient_menu_item_active='true';
+			return view('home.patients_table',compact('patient_menu_item_active'));
+		}
+		public function postSearchPatient()
+		{
+			$input=request()->all();
+			$medical_device_category=$this->medical_device_category;
+			$patients=Patient::where(function($query) use($input){
+									if($input['pid'] != ""){
+										if($input['pid'][0] == "N" || $input['pid'][0] == "n")
+											$input['pid']=substr($input['pid'],1);
+										$query->where('id',$input['pid']);
+									}
+									elseif($input['name'] != "")
+										$query->where('name','like',"%$input[name]%");
+									elseif($input['sin'] != "")
+										$query->where('sin',$input['sin']);
+								})
+								->get();
+			$patient_menu_item_active='true';
+			return view('home.patients_table',compact('patients','patient_menu_item_active'));
 		}
 		private function sendingData($visit,$medical_order_item,$op='add'){
 

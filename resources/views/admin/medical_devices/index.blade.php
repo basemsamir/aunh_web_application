@@ -19,6 +19,7 @@
             				<tr>
             				  <th style="text-align:center">م</th>
                       <th style="text-align:center">الأسم</th>
+                      <th style="text-align:center">الفئة</th>
                       <th style="text-align:center">النوع</th>
                       <th style="text-align:center">المكان</th>
             				  <th style="text-align:center">تعديل</th>
@@ -30,7 +31,8 @@
                       <tr>
                         <td>{{ $device->id }}</td>
                         <td>{{  $device->name }}</td>
-                        <td>{{  $device->medical_device_type->name }}</td>
+                        <td>{{  isset($device->medical_device_type->category->arabic_name)?$device->medical_device_type->category->arabic_name:''  }}</td>
+                        <td>{{  isset($device->medical_device_type->name)?$device->medical_device_type->name:'' }}</td>
                         <td>{{  $device->location }}</td>
                         <td><a href='{{ url("admin/medical_device/{$device->id}/edit") }}' title='تعديل'  class='btn btn-info'  >
                               <i class='fa fa-edit'></i></a>

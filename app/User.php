@@ -13,7 +13,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password',
+        'name', 'email', 'password','role_id'
     ];
 
     /**
@@ -29,8 +29,15 @@ class User extends Authenticatable
 		return $this->belongsToMany('App\ReservationPlace')->withTimestamps();
 	}
 
-  public function visits()
-  {
-    return $this->hasMany('App\Visit');
-  }
+    public function setPasswordAttribute($value){
+        $this->attributes['password'] = bcrypt($value);
+    }
+    public function visits(){
+        return $this->hasMany('App\Visit');
+    }
+    
+    public function role()
+    {
+        return $this->belongsTo('App\Role');
+    }
 }

@@ -15,7 +15,7 @@
   <div class="row">
 		<div class="col-md-12" style="direction: rtl;">
         <div class="panel panel-default">
-            <div class="panel-heading" > بيانات المرضي </div>
+            <div class="panel-heading" >بيانات المرضي</div>
             <div class="panel-body">
                 <table id="patient_tb" class="table table-bordered">
           				<thead >
@@ -55,36 +55,33 @@ $(document).ajaxComplete(function(){
   }
 });
 $(document).ready(function(){
-
-
   $("#patient_form").submit(function(){
       $("#saveing_state b").text('جاري حفظ البيانات .....');
       $("#saveing_state").show();
   });
   $('#patient_tb').DataTable({
-          "processing": true,
-          "serverSide": true,
-          "deferRender": true,
-          "lengthMenu": [10],
-          "ajax":{
-                   "url": "{{ url('ajax/getPatientsToday') }}",
-                   "dataType": "json",
-                   "type": "POST",
-                   "data":{ _token: "{{csrf_token()}}"}
-                 },
-          "columns": [
-              { "data": "id" },
-              { "data": "name" },
-              { "data": "sin" },
-              { "data": "visit_date" },
-              { "data": "last_proc_date" },
-              { "data": "patient_options" },
-              { "data": "visit_options" },
-          ],
-          "columnDefs": [
-              { "targets": [2,3,4,5,6], "searchable": false, "orderable": false, "visible": true }
-          ]
-      });
+      "processing": true,
+      "serverSide": true,
+      "deferRender": true,
+      "lengthMenu": [10],
+      "ajax":{
+        "url": "{{ url('ajax/getPatientsToday') }}",
+        "dataType": "json",
+        "type": "POST"
+      },
+      "columns": [
+          { "data": "id" },
+          { "data": "name" },
+          { "data": "sin" },
+          { "data": "visit_date" },
+          { "data": "last_proc_date" },
+          { "data": "patient_options" },
+          { "data": "visit_options" },
+      ],
+      "columnDefs": [
+          { "targets": [2,3,4,5,6], "searchable": false, "orderable": false, "visible": true }
+      ]
+  });
 
   var today=new Date();
   $("#device").prop("selectedIndex",0);

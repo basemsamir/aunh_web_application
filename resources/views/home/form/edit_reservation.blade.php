@@ -5,7 +5,11 @@
 @else
 	{!! Form::model($patient,['route'=>'ris.store','id'=>'patient_form']) !!}
 @endif
-@include('home.rad')
+@if($user_role == 'Lab')
+	@include('home.lab')
+@else
+	@include('home.rad')
+@endif
 <div class="col-md-6">
 	<div class="panel panel-default" >
 		<div class="panel-heading">بيانات المريض</div>

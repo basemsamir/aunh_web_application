@@ -52,7 +52,7 @@ class AdminController extends Controller
 	}
 	public function medical_device_index()
 	{
-		$devices=MedicalDevice::all();
+		$devices=MedicalDevice::with('medical_device_type.category')->get();
 		$panel_title='بيانات الأجهزة';
 		$dev_active='true';
 		return view('admin.medical_devices.index', compact('devices','panel_title','dev_active') );
@@ -67,7 +67,7 @@ class AdminController extends Controller
 	}
 	public function user_index()
 	{
-		$users=User::all();
+		$users=User::with('role')->get();
 		$panel_title='بيانات المستخدمين';
 		$user_active='true';
 		return view('admin.users.index', compact('users','panel_title','user_active') );
@@ -82,32 +82,32 @@ class AdminController extends Controller
 	public function device_proc_index()
 	{
 		$device_procs=MedicalDevice::all();
-  	$panel_title='بيانات فحوصات أجهزة الأشعة';
+  		$panel_title='بيانات فحوصات أجهزة الأشعة';
 		$dev_proc_active='true';
 		return view('admin.procedures.device_proc_index', compact('device_procs','panel_title','dev_proc_active') );
 	}
 	public function wsconfig_index($value='')
 	{
-			$configs= Wsconfig::all();
-			$panel_title='بيانات إعدادات التواصل مع خدمة الويب الخاصة بالنظام الأشعة';;
-			return view('admin.wsconfig.index', compact('configs','panel_title'));
+		$configs= Wsconfig::all();
+		$panel_title='بيانات إعدادات التواصل مع خدمة الويب الخاصة بالنظام الأشعة';;
+		return view('admin.wsconfig.index', compact('configs','panel_title'));
 	}
 	public function getStatisticsToday($value='')
 	{
-			$orders_today=MedicalOrderItem::join('medical_device_procedure','medical_order_items.medical_device_procedure_id','=','medical_device_procedure.id')
-																		->join('medical_devices','medical_devices.id','=','medical_device_procedure.medical_device_id')
-																		->join('medical_device_types','medical_device_types.id','=','medical_devices.medical_device_type_id')
-																		->groupBy('medical_device_types.id')
-																		->select('medical_device_types.name as label',DB::raw('count(*) as y'))
-																		->where('medical_order_items.procedure_date','=',date('Y-m-d'))
-																		->get();
+		$orders_today=MedicalOrderItem::join('medical_device_procedure','medical_order_items.medical_device_procedure_id','=','medical_device_procedure.id')
+									->join('medical_devices','medical_devices.id','=','medical_device_procedure.medical_device_id')
+									->join('medical_device_types','medical_device_types.id','=','medical_devices.medical_device_type_id')
+									->groupBy('medical_device_types.id')
+									->select('medical_device_types.name as label',DB::raw('count(*) as y'))
+									->where('medical_order_items.procedure_date','=',date('Y-m-d'))
+									->get();
 
-			return response()->json(['data'=>$orders_today]);
+		return response()->json(['data'=>$orders_today]);
 	}
 	public function transactionLog($value='')
 	{
-			$logdata = Log::take(100)->orderBy('id','desc')->get();
+		$logdata = Log::take(100)->orderBy('id','desc')->get();
 
-			return view('home.tran_log',compact('logdata'));
+		return view('home.tran_log',compact('logdata'));
 	}
 }

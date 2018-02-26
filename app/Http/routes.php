@@ -21,8 +21,11 @@ Route::post('ajax/postProcDevice','HomeController@ajaxStoreDeviceProc');
 Route::post('ajax/deleteProcDevice','HomeController@ajaxDeleteDeviceProc');
 Route::post('ajax/getPatientsToday','HomeController@ajaxGetAllPatientsToday');
 
-Route::get('patients', 'HomeController@search')->name('ris.patient_search');
-Route::post('patients', 'HomeController@post_search')->name('ris.post_search');
+Route::get('patients_proc', 'HomeController@searchPatientProc')->name('ris.patient_proc_search');
+Route::post('patients_proc', 'HomeController@postSearchPatientProc')->name('ris.patient_proc_search');
+
+Route::get('patients', 'HomeController@searchPatient')->name('ris.patient_search');
+Route::post('patients', 'HomeController@postSearchPatient')->name('ris.patient_search');
 
 //Login Routes...
 Route::auth();
@@ -48,6 +51,7 @@ Route::resource('admin/reservation_place','ReservationPlacesController', array('
 Route::resource('admin/department','DepartmentsController', array('except'=>['index','show']));
 Route::resource('admin/doctor','DoctorsController', array('except'=>['index','show']));
 Route::resource('admin/medical_device','MedicalDevicesController', array('except'=>['index','show']));
+Route::post('admin/api/medical_device_types','MedicalDevicesController@getMedicalDeviceTypesApi')->name('api.medical_device_types');
 Route::resource('admin/procedure','ProceduresController', array('except'=>['index','show']));
 Route::resource('admin/user','UsersController', array('except'=>['index','show']));
 Route::resource('admin/reservation_user','ReservationPlaceUsersController', array('except'=>['index','show','update','edit']));

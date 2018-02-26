@@ -20,22 +20,27 @@
             				  <th style="text-align:center">م</th>
                       <th style="text-align:center">الأسم</th>
                       <th style="text-align:center">البريد الألكتروني</th>
+                      <th style="text-align:center">الدور</th>
                       <th style="text-align:center">تعديل</th>
                       <th style="text-align:center">حذف</th>
             				</tr>
             				</thead>
             				<tbody>
+                      <?php $i=1;?>
                       @foreach($users as $user)
+                      
                       <tr>
-                        <td>{{ $user->id }}</td>
+                        <td>{{  $i++ }}</td>
                         <td>{{  $user->name }}</td>
                         <td>{{  $user->email }}</td>
+                        <td>{{  $user->role->arabic_name }}</td>
                         <td><a href='{{ url("admin/user/{$user->id}/edit") }}' title='تعديل'  class='btn btn-info'  >
                               <i class='fa fa-edit'></i></a>
                         </td>
                         <td>
                         {!! Form::open(['url'=>"admin/user/{$user->id}",'method'=>'delete']) !!}
-                            <button type="submit" class="btn btn-danger"><i class='fa fa-close'></i>
+                            <button type="submit" class="btn btn-danger" 
+                            onclick="return confirm('هل تريد حذف هذا المستخدم ?')"><i class='fa fa-close'></i>
                             </button>
                         {!! Form::close() !!}
                         </td>

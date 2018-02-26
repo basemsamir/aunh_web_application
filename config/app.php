@@ -160,7 +160,8 @@ return [
         App\Providers\RouteServiceProvider::class,
         App\Providers\SINValidationRuleProvider::class,
         Rap2hpoutre\LaravelLogViewer\LaravelLogViewerServiceProvider::class,
-        Fish\Logger\LoggerServiceProvider::class
+        Fish\Logger\LoggerServiceProvider::class,
+        App\Providers\MedicalCategoryComposerProvider::class,
     ],
 
     /*
