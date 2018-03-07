@@ -2,8 +2,8 @@
 @section('content')
 <div class="container">
     <div class="row" >
-      <div class="col-lg-12">
-        <table id="example3" class="table table-bordered table-hover">
+      <div class="col-lg-12" style="    overflow-x: scroll;">
+        <table id="log_tb" class="table table-bordered table-hover">
           <thead>
           <tr>
             <th style="text-align:center">Number</th>
@@ -31,3 +31,8 @@
     </div>
 </div>
 @endsection
+@section('javascript')
+<script type="text/javascript">
+    $("#log_tb").DataTable();
+</script>
+@stop

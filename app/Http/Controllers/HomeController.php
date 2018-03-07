@@ -85,8 +85,8 @@ class HomeController extends Controller
 		$day_month=$this->day_month_array();
 		$departments=Department::lists('name','id');
 		$ref_doctors=Doctor::lists('name','id');
-
-        return view('home.form.store_reservation',compact('devices','device_procedures','rs_places_list','day_month','departments','ref_doctors'));
+		$index_menu_item_active='true';
+        return view('home.form.store_reservation',compact('index_menu_item_active','devices','device_procedures','rs_places_list','day_month','departments','ref_doctors'));
     }
 	private function day_month_array()
 	{
@@ -416,17 +416,21 @@ class HomeController extends Controller
 						$search=substr($search,1);
 					
 					$query=
-					$patient_visits = Patient::where('patients.id','LIKE',"%{$search}%")
-											->orWhere('name', 'LIKE',"%{$search}%")									
-											->select('patients.id','name','sin',
-											DB::raw('(select max(id) from visits 
-											
-											where patient_id=patients.id) as vid '),
-											DB::raw('(select max(created_at) from visits where patient_id=patients.id) as created_at '),
-											DB::raw('(select count(*) from medical_order_items where medical_order_items.visit_id= vid
-											and date(`procedure_date`) >= CURRENT_DATE() ) as procs_count'),
-											DB::raw('(select max(procedure_date) from medical_order_items where medical_order_items.visit_id= vid
-											and date(`procedure_date`) >= CURRENT_DATE() ) as last_proc_date'))
+					$patient_visits = Patient::leftJoin(
+											DB::raw('( select visits.id as vid,visits.patient_id,
+											max(visits.created_at) as created_at,
+											count(medical_order_items.id) procs_count ,max(medical_order_items.procedure_date) last_proc_date from visits join medical_order_items on visits.id=medical_order_items.visit_id
+											join medical_device_procedure on medical_order_items.medical_device_procedure_id=medical_device_procedure.id
+											join medical_devices on medical_device_procedure.medical_device_id=medical_devices.id
+											join medical_device_types on medical_devices.medical_device_type_id=medical_device_types.id
+											join medical_device_categories on medical_device_types.medical_device_category_id=medical_device_categories.id
+											where medical_device_categories.id='.$this->medical_device_category.'
+											and DATE(medical_order_items.procedure_date) >= CURDATE()
+											group by visits.id
+											) t'),'patients.id','=','t.patient_id')
+											->where('patients.id','LIKE',"%{$search}%")
+											->orWhere('patients.name', 'LIKE',"%{$search}%")						
+											->select('patients.id','patients.name','sin','address','t.created_at','vid','procs_count','last_proc_date')
 											->offset($start)
 											->limit($limit)
 											->orderBy($order)
@@ -449,17 +453,18 @@ class HomeController extends Controller
 						$nestedData['id'] = "N".$patient_visit->id;
 						$nestedData['name'] = $patient_visit->name;
 						$nestedData['sin'] = $patient_visit->sin;
+						$nestedData['address'] = $patient_visit->address;
 						$nestedData['visit_date'] =is_null($patient_visit->created_at)?"":Carbon::parse($patient_visit->created_at)->format('Y-m-d');
 						$nestedData['last_proc_date'] =is_null($patient_visit->last_proc_date)?"":Carbon::parse($patient_visit->last_proc_date)->format('Y-m-d');
 						
 						if(!is_null($patient_visit->vid) 
 							&& $patient_visit->procs_count ){
-								$nestedData['visit_options'] = "<a href='{$edit}' title='تعديل زيارة'  class='btn btn-info' ><i class='fa fa-edit'></i></a>";
+								$nestedData['visit_options'] = "<a href='{$edit}' title='تعديل الحجز'  class='btn btn-info' ><i class='fa fa-edit'></i></a>";
 								$nestedData['patient_options']=""; 
 							}
 							
 						else{
-							$nestedData['patient_options'] = "<a href='{$new}' title='عمل زيارة جديدة'  class='btn btn-success'  ><i class='fa fa-plus'></i></a>";
+							$nestedData['patient_options'] = "<a href='{$new}' title='عمل حجز جديد'  class='btn btn-success'  ><i class='fa fa-plus'></i></a>";
 							$nestedData['visit_options']="";	
 						}
 							
@@ -491,7 +496,10 @@ class HomeController extends Controller
 										})
 										->whereDate('medical_order_items.created_at','=',Carbon::now()->format('Y-m-d'))
 										->get();
-			$devices=MedicalDevice::lists('name','id');
+			$devices=MedicalDevice::whereHas('medical_device_proc.device_order_item.medical_device_type.category',function($query) use($medical_device_category){
+										$query->where('id',$medical_device_category);
+									})
+								  ->lists('name','id');
 			$patients_proc_menu_item_active='true';
 			return view('home.patients_proc_table',compact('orders','devices','patients_proc_menu_item_active'));
 		}

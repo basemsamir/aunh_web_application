@@ -23,10 +23,17 @@
           				  <th style="text-align:center">الكود</th>
           				  <th style="text-align:center">الأسم</th>
                     <th style="text-align:center">الرقم القومي</th>
-                    <th style="text-align:center">تاريخ  اخر زيارة</th>
-                    <th style="text-align:center">تاريخ أخر فحص تم حجزه</th>
-          				  <th style="text-align:center">عمل زيارة جديدة</th>
-                    <th style="text-align:center">تعديل زيارة</th>
+                    <th style="text-align:center">العنوان</th>
+                    <th style="text-align:center">تاريخ  اخر حجز</th>
+                    <th style="text-align:center">
+                      @if($user_role == "Xray")
+                        تاريخ أخر فحص تم حجزه
+                      @else
+                        تاريخ اخر تحليل تم حجزه
+                      @endif    
+                    </th>
+          				  <th style="text-align:center">عمل حجز جديد</th>
+                    <th style="text-align:center">تعديل الحجز</th>
           				</tr>
           				</thead>
           				<tbody>
@@ -73,13 +80,14 @@ $(document).ready(function(){
           { "data": "id" },
           { "data": "name" },
           { "data": "sin" },
+          { "data": "address" },
           { "data": "visit_date" },
           { "data": "last_proc_date" },
           { "data": "patient_options" },
           { "data": "visit_options" },
       ],
       "columnDefs": [
-          { "targets": [2,3,4,5,6], "searchable": false, "orderable": false, "visible": true }
+          { "targets": [2,3,4,5,6,7], "searchable": false, "orderable": false, "visible": true }
       ]
   });
 

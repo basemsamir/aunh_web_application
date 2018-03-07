@@ -64,11 +64,16 @@
                               <td>{{  $patient->name }}</td>
                               <td>{{  $patient->sin }}</td>
                               <td>{{  $patient->birthdate}}</td>
-                              <td>{{  $patient->birthdate}}</td>
+                              <td>{{  calculateAge($patient->birthdate)}}</td>
                               <td>{{  $patient->address }}</td>
                               <td>{{  $patient->phone_num }}</td>
                               <td>{{  $patient->nationality }}</td>
-                              <td>{{  $patient->birthdate}}</td>
+                              <td align="center">
+                                <a href="{{ route('ris.show',$patient->id) }}" class="btn btn-success">
+                                  <i class="fa fa-plus"></i>
+                                </a>
+                              </td>
+                              
                             </tr>
                         @endforeach
                       @endif
@@ -85,6 +90,9 @@
     $("#patient_search_tb").DataTable({
           "searching": false,
           "bLengthChange": false,
+          "columnDefs": [
+            { "targets": [2,3,4,5,6,7,8], "searchable": false, "orderable": false, "visible": true }
+          ]
     });
 </script>
 @stop

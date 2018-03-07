@@ -24,13 +24,7 @@
         <div class="collapse navbar-collapse" id="app-navbar-collapse">
             <!-- Left Side Of Navbar -->
 
-            <ul class="nav navbar-nav">
-                @if(Auth::guard('admin')->check())
-                @include('layouts.admin.menu')
-                @elseif(Auth::check())
-                @include('layouts.home.menu')
-                @endif
-            </ul>
+            
 
             <!-- Right Side Of Navbar -->
             <ul class="nav navbar-nav navbar-right">
@@ -46,33 +40,39 @@
                                     <span class="caret"></span>
                         </a>
                         <ul class="dropdown-menu" role="menu">
-                        @if(Auth::guard('admin')->check())
-                        <li>
-                            <a href="{{ url('/admin/wsconfig') }}">
-                                <i class="fa fa-btn fa-cogs"></i>Ws config
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url('error_log') }}">
-                                <i class="fa fa-btn fa-exclamation-triangle"></i> Error log
-                            </a>
-                        </li>
-                        <li>
-                            <a href="{{ url('tran_log') }}">
-                                <i class="fa fa-btn fa-book" aria-hidden="true"></i></i>Transaction log
-                            </a>
-                        </li>
-                        @endif
-                        <li>
-                                            <a href="@if(Auth::check()) {{ url('/logout') }} @else {{ url('/admin/logout') }} @endif">
-                                                    <i class="fa fa-btn fa-sign-out"></i>Logout</a>
-                        </li>
-
-                                    </ul>
+                            @if(Auth::guard('admin')->check())
+                            <li>
+                                <a href="{{ url('/admin/wsconfig') }}">
+                                    <i class="fa fa-btn fa-cogs"></i>أعدادات الأنظمة
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ url('error_log') }}">
+                                    <i class="fa fa-btn fa-exclamation-triangle"></i> سجل أخطاء النظام
+                                </a>
+                            </li>
+                            <li>
+                                <a href="{{ url('tran_log') }}">
+                                    <i class="fa fa-btn fa-book" aria-hidden="true"></i></i> سجل الأدخال
+                                </a>
+                            </li>
+                            @endif
+                            <li>
+                                <a href="@if(Auth::check()) {{ url('/logout') }} @else {{ url('/admin/logout') }} @endif">
+                                    <i class="fa fa-btn fa-sign-out"></i>تسجيل خروج</a>
+                            </li>
+                        </ul>
                     </li>
                 @endif
             </ul>
             <!-- End of Right Side Of Navbar -->
+            <ul class="nav navbar-nav navbar-right">
+                @if(Auth::guard('admin')->check())
+                @include('layouts.admin.menu')
+                @elseif(Auth::check())
+                @include('layouts.home.menu')
+                @endif
+            </ul>
             </div>
             <!-- End of #app-navbar-collapse -->
         </div>

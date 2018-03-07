@@ -13,7 +13,7 @@
 
     <!-- Styles -->
     <link rel="stylesheet" href="{{asset('css/bootstrap.css')}}" >
-	  <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+	<link href="{{ asset('css/app.css') }}" rel="stylesheet">
 	<!-- Date Picker -->
     <link rel="stylesheet" href="{{asset('plugins/datepicker/datepicker3.css')}}">
     <link rel="stylesheet" href="{{asset('plugins/datatables/datatable.css')}}">
@@ -30,6 +30,9 @@
     		}
         .age_style{
           width: 32% !important;
+        }
+        .leftText{
+            text-align:left
         }
     </style>
     @yield('chart')

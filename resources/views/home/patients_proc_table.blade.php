@@ -54,6 +54,17 @@
 
                 {!! Form::close() !!}
                 <br>
+                <?php
+                  if($user_role == 'Lab'){
+                    $device_type='التحليل';
+                    $doctor_type=$device_type;
+                  }
+                  else{
+                    $device_type='الفحص';
+                    $doctor_type='الأشعة';
+                  }
+                   
+                ?>
                 <table id="patient_search_tb" class="table table-bordered">
           				<thead >
           				<tr>
@@ -62,12 +73,14 @@
                     <th style="text-align:center">الرقم القومي</th>
                     <th style="text-align:center">تاريخ الميلاد</th>
                     <th style="text-align:center">العنوان</th>
-                    <th style="text-align:center">تاريخ الفحص</th>
+                    <th style="text-align:center">تاريخ {{ $device_type }}</th>
                     <th style="text-align:center">أسم الجهاز</th>
-                    <th style="text-align:center">نوع الفحص</th>
-                    <th style="text-align:center">حالة الفحص</th>
+                    <th style="text-align:center">نوع {{ $device_type }}</th>
+                    <th style="text-align:center">حالة {{ $device_type }}</th>
                     <th style="text-align:center">القسم</th>
-                    <th style="text-align:center">طبيب الأشعة</th>
+                    <th style="text-align:center">طبيب {{ $doctor_type }}</th>
+                    <th style="text-align:center">تعديل الحجز</th>
+                    <th style="text-align:center">حجز جديد</th>
           				</tr>
           				</thead>
           				<tbody>
@@ -86,6 +99,17 @@
                             <td>{{  $order->procedure_status }}</td>
                             <td>{{  $order->department->name }}</td>
                             <td>{{  $order->ref_doctor->name }}</td>
+                            <td>
+                              <a href="{{ route('ris.edit',$order->visit->id) }}" class="btn btn-info 
+                                @if($order->procedure_date != \Carbon\Carbon::today()->format('Y-m-d') ) disabled @endif">
+                                <i class="fa fa-edit"></i>
+                              </a>
+                            </td>
+                            <td>
+                              <a href="{{ route('ris.show',$order->visit->patient->id) }}" class="btn btn-primary">
+                                <i class="fa fa-plus"></i>
+                              </a>
+                            </td>
                           </tr>
                         @endif
                       @endforeach
@@ -120,6 +144,9 @@
       $("#patient_search_tb").DataTable({
           "searching": false,
           "bLengthChange": false,
+          "columnDefs": [
+            { "targets": [2,3,4,5,6,7,8,9,10,11,12], "searchable": false, "orderable": false, "visible": true }
+          ]
       });
 
       // functions

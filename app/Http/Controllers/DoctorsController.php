@@ -24,7 +24,7 @@ class DoctorsController extends Controller
     public function create()
     {
         //
-        $panel_title='بيانات أطباء الأشعة';
+        $panel_title='بيانات الأطباء';
         $doc_active='true';
         return view($this->base_folder_name.'.store',compact('panel_title','doc_active'));
     }
@@ -56,7 +56,7 @@ class DoctorsController extends Controller
     public function edit($id)
     {
         //
-        $panel_title='بيانات أطباء الأشعة';
+        $panel_title='بيانات الأطباء';
         $doc_active='true';
         $doc=Doctor::find($id);
         return view($this->base_folder_name.'.edit',compact('doc','panel_title','doc_active'));

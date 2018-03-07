@@ -26,6 +26,6 @@ class HomeComposer
      */
     public function compose(View $view)
     {
-        $view->with('user_role', $this->user->role->name);
+        $view->with('user_role', isset($this->user->role->name)?$this->user->role->name:'');
     }
 }

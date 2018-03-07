@@ -28,12 +28,12 @@
                     @if($errors->has('sending_fac')) <span class="help-block">{{ $errors->first('sending_fac') }}</span> @endif
                   </div>
                   <div class="form-group @if($errors->has('receiving_app')) has-error @endif">
-                    {!! Form::label('Receiving Facility') !!}
+                    {!! Form::label('Receiving Application') !!}
                     {!! Form::text('receiving_app',null,array('class'=>'form-control')) !!}
                     @if($errors->has('receiving_app')) <span class="help-block">{{ $errors->first('receiving_app') }}</span> @endif
                   </div>
                   <div class="form-group @if($errors->has('receiving_fac')) has-error @endif">
-                    {!! Form::label('Receiving Application') !!}
+                    {!! Form::label('Receiving Facility') !!}
                     {!! Form::text('receiving_fac',null,array('class'=>'form-control')) !!}
                     @if($errors->has('receiving_fac')) <span class="help-block">{{ $errors->first('receiving_fac') }}</span> @endif
                   </div>

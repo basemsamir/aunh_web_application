@@ -46,7 +46,7 @@ class AdminController extends Controller
 	public function doctor_index()
 	{
 		$docs=Doctor::all();
-		$panel_title='بيانات أطباء الأشعة';
+		$panel_title='بيانات الأطباء';
 		$doc_active='true';
 		return view('admin.doctors.index', compact('docs','panel_title','doc_active') );
 	}
@@ -75,24 +75,24 @@ class AdminController extends Controller
 	public function res_user_index()
 	{
 		$res_users=ReservationPlace::all();
-		$panel_title='بيانات مستخدمين مكاتب الحجز';
+		$panel_title='بيانات مستخدمي مكاتب الحجز';
 		$res_user_active='true';
 		return view('admin.users.res_user_index', compact('res_users','panel_title','res_user_active') );
 	}
 	public function device_proc_index()
 	{
 		$device_procs=MedicalDevice::all();
-  		$panel_title='بيانات فحوصات أجهزة الأشعة';
+  		$panel_title='بيانات فحوصات الأجهزة الطبية';
 		$dev_proc_active='true';
 		return view('admin.procedures.device_proc_index', compact('device_procs','panel_title','dev_proc_active') );
 	}
-	public function wsconfig_index($value='')
+	public function wsconfig_index()
 	{
 		$configs= Wsconfig::all();
-		$panel_title='بيانات إعدادات التواصل مع خدمة الويب الخاصة بالنظام الأشعة';;
+		$panel_title='بيانات إعدادات التواصل مع خدمة الويب الخاصة بالأنظمة';
 		return view('admin.wsconfig.index', compact('configs','panel_title'));
 	}
-	public function getStatisticsToday($value='')
+	public function getStatisticsToday()
 	{
 		$orders_today=MedicalOrderItem::join('medical_device_procedure','medical_order_items.medical_device_procedure_id','=','medical_device_procedure.id')
 									->join('medical_devices','medical_devices.id','=','medical_device_procedure.medical_device_id')
@@ -104,10 +104,9 @@ class AdminController extends Controller
 
 		return response()->json(['data'=>$orders_today]);
 	}
-	public function transactionLog($value='')
+	public function transactionLog()
 	{
 		$logdata = Log::take(100)->orderBy('id','desc')->get();
-
 		return view('home.tran_log',compact('logdata'));
 	}
 }
