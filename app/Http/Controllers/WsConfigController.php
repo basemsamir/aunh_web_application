@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Lang;
 use App\Http\Requests;
 use App\Wsconfig;
+use App\Http\Requests\WsConfigRequest;
 
 class WsConfigController extends Controller
 {
@@ -34,37 +35,24 @@ class WsConfigController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(WsConfigRequest $request)
     {
         //
-        $rules['url']='required|url';
-        $rules['sending_app']='required';
-        $rules['receiving_app']='required';
-        $rules['sending_fac']='required';
-        $rules['receiving_fac']='required';
-        $this->validate($request,$rules);
-
         Wsconfig::create($request->all());
         return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
 
     }
-
-
-
     /**
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
+    public function edit(Wsconfig $wsconfig)
     {
-        //
-        $wsconfig=Wsconfig::find($id);
-        $panel_title='بيانات إعدادات التواصل مع خدمة الويب الخاصة بالنظام الأشعة';;
+        $panel_title='بيانات إعدادات التواصل مع خدمة الويب الخاصة بالنظام الأشعة';
         return view($this->base_folder_name.'.edit',compact('panel_title','wsconfig'));
     }
-
     /**
      * Update the specified resource in storage.
      *
@@ -72,32 +60,22 @@ class WsConfigController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(WsConfigRequest $request, Wsconfig $wsconfig)
     {
         //
-        $rules['url']='required|url';
-        $rules['sending_app']='required';
-        $rules['receiving_app']='required';
-        $rules['sending_fac']='required';
-        $rules['receiving_fac']='required';
-        $this->validate($request,$rules);
-
-        Wsconfig::find($id)->update($request->all());
-
+        $wsconfig->update($request->all());
         return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
-
     }
-
     /**
      * Remove the specified resource from storage.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Wsconfig $wsconfig)
     {
         //
-        $device=Wsconfig::find($id)->delete();
+        $wsconfig->delete();
         return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
 
     }

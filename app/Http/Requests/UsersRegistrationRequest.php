@@ -23,13 +23,18 @@ class UsersRegistrationRequest extends Request
      */
     public function rules()
     {
-        return [
-            //
-            'name'=>'required|min:4|max:20|unique:users,name',
-            'email'=>'required|email|unique:users,email',
-            'role_id'=>'required',
-            'password'=>'required|min:6|max:20|confirmed',
-        ];
+        $rules['role_id']='required';
+        if(isset(request()->id)){
+            $rules['name']='required|min:4|max:20|unique:users,name,'.request()->id;
+            $rules['email']='required|email|unique:users,email,'.request()->id;
+            $rules['password']='min:6|max:20|confirmed';
+        }
+        else{
+            $rules['name']='required|min:4|max:20|unique:users,name';
+            $rules['email']='required|email|unique:users,email';
+            $rules['password']='required|min:6|max:20|confirmed';
+        }
+        return $rules;
     }
     public function messages()
     {

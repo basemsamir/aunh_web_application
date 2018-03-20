@@ -11,15 +11,16 @@
           <div class="panel panel-default">
               <div class="panel-heading" > {{ $panel_title }} </div>
               <div class="panel-body">
-                {!! Form::model($proc,['url' => "admin/procedure/{$proc->id}",'method'=>'patch']) !!}
+                {!! Form::model($procedure,['url' => "admin/procedure/{$procedure->id}",'method'=>'patch']) !!}
                   <div class="form-group @if($errors->has('name')) has-error @endif">
                     {!! Form::label('الأسم') !!}
                     {!! Form::text('name',null,array('class'=>'form-control')) !!}
+                    {!! Form::hidden('id',$procedure->id) !!}
                     @if($errors->has('name')) <span class="help-block">{{ $errors->first('name') }}</span> @endif
                   </div>
                   <div class="form-group @if($errors->has('type_id')) has-error @endif">
                     {!! Form::label('نوع الفحص') !!}
-                    {!! Form::select('type_id',$proceduretypes,$proc->type_id,array('class'=>'form-control')) !!}
+                    {!! Form::select('type_id',$proceduretypes, $procedure->type_id,array('class'=>'form-control')) !!}
                     @if($errors->has('type_id')) <span class="help-block">{{ $errors->first('type_id') }}</span> @endif
                   </div>
                   <div class="form-group @if($errors->has('proc_ris_id')) has-error @endif">

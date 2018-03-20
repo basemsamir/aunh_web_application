@@ -34,7 +34,7 @@ class ReservationRequest extends Request
 					'sin'=>'size:14|unique:patients,sin',
 					'address'=>'min:3',
 					'nationality'=>'min:3',
-					'phone_number'=>'min:4|max:20',
+					'phone_num'=>'min:4|max:20',
 					'birthdate' => 'required|date',
 				  'sin'=>'numeric|sin_format|unique:patients,sin',
         ];

@@ -68,17 +68,8 @@ class UsersController extends Controller
     * @param  int  $id
     * @return \Illuminate\Http\Response
     */
-   public function update(Request $request,User $user)
+   public function update(UsersRegistrationRequest $request,User $user)
    {
-       $rules['name']='required|min:4|max:20|unique:users,name,'.$user->id;
-       $rules['email']='required|email|unique:users,email,'.$user->id;
-       $rules['role_id']='required';
-       $rules['password']='min:6|max:20|confirmed';
-
-       $message['name.unique']='أسم المستخدم موجود من قبل';
-       $message['email.unique']='البريد الألكتروني موجود من قبل';
-       $message['password.confirmed']="كلمتي المرور غير متطابقتين";
-       $this->validate($request,$rules,$message);
        $user->name=$request->input('name');
        $user->email=$request->input('email');
        $user->role_id=$request->input('role_id');

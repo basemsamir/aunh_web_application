@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests;
 use Illuminate\Http\Request;
 use App\Http\Requests\ReservationRequest;
+use App\Http\Requests\UpdatePatientRequest;
 use App\MedicalDevice;
 use App\MedicalOrderItem;
 use App\Procedure;
@@ -57,7 +58,8 @@ class HomeController extends Controller
 					break;
 			}
 		}			
-    }
+	}
+	
     /**
      * Show the application dashboard.
      *
@@ -65,7 +67,8 @@ class HomeController extends Controller
      */
     public function index()
     {	
-		//dd(Session::get('proc_devices'));
+		if($this->role == "Registration")
+			return redirect()->route('ris.patient');
 		Session::forget('proc_devices');
 		$medical_device_category=$this->medical_device_category;
 		$devices= MedicalDevice::whereHas('medical_device_type',function ($query) use ($medical_device_category) {
@@ -77,7 +80,10 @@ class HomeController extends Controller
 										$query->where('medical_device_category_id',$medical_device_category);
 									})
 									->first();
-		$device_procedures= $first_device->procedures()->lists('procedures.name','procedures.id');
+		if($first_device)
+			$device_procedures= $first_device->procedures()->lists('procedures.name','procedures.id');
+		else
+			$device_procedures= array();		
 		$rs_places=$this->user->reservation_places()->get();
 		$rs_places_list=array();
 		foreach($rs_places as $rs_place)
@@ -87,7 +93,37 @@ class HomeController extends Controller
 		$ref_doctors=Doctor::lists('name','id');
 		$index_menu_item_active='true';
         return view('home.form.store_reservation',compact('index_menu_item_active','devices','device_procedures','rs_places_list','day_month','departments','ref_doctors'));
-    }
+	}
+	
+	public function create_patient()
+	{
+		# code...
+		$index_menu_item_active=true;
+		return view('home.form.store_registration',compact('index_menu_item_active'));
+	}
+
+	public function store_patient(ReservationRequest $request)
+	{
+		# code...
+		$patient=Patient::create($request->all());
+		return redirect()->back()->withSuccessMessage(Lang::get('flash_messages.success'))
+								 ->withPid('N'.$patient->id);
+	}
+	
+	public function edit_patient(Patient $patient)
+	{
+		# code...
+		$index_menu_item_active=true;
+		return view('home.form.edit_registration',compact('index_menu_item_active','patient'));
+	}
+
+	public function update_patient(UpdatePatientRequest $request,Patient $patient)
+	{
+		# code...
+		$patient->update($request->all());
+		return redirect()->back()->withSuccessMessage(Lang::get('flash_messages.success'));
+	}
+
 	private function day_month_array()
 	{
 		$monthes=array();
@@ -100,14 +136,6 @@ class HomeController extends Controller
 			$days[$i]=$i;
 		return array($days,$monthes);
 	}
-	private function getBirthday($day,$month,$year)
-	{
-		# code...
-		$birthdate=strtotime("-".($day==""?0:$day)." day",time());
-		$birthdate=strtotime("-".($month==""?0:$month)." month",$birthdate);
-		$birthdate=strtotime("-".($year==""?0:$year)." year",$birthdate);
-		return date('Y-m-d',$birthdate);
-	}
 	public function store(ReservationRequest $request){
 
 		$input=$request->all();
@@ -118,14 +146,17 @@ class HomeController extends Controller
 		try{
 
 			$proc_devices=Session::get('proc_devices');
+			
 			$input['sin']=$input['sin']==""?null:$input['sin'];
 			if(!isset($input['pid'])){
 				$patient= Patient::create($input);
+				
 			}
 			else{
 				$patient=Patient::find($input['pid']);
 				$patient->update($input);
 			}
+			
 			//dd($proc_devices);
 			$visit=$patient->visits()->create([
 				'entry_id'=>$input['rs_place'],
@@ -136,16 +167,18 @@ class HomeController extends Controller
 			}
 			catch (\Exception $e){
 				DB::rollBack();
+				
 				return redirect()->back()->withFailureMessage(Lang::get('flash_messages.wsdl_error'));
 			}
 			Session::forget('proc_devices');
 			DB::commit();
-			return redirect()->back()->withSuccessMessage(Lang::get('flash_messages.success'));
+			return redirect()->back()->withSuccessMessage(Lang::get('flash_messages.success'))
+									 ->withPid("N".$patient->id);
 		}
 		catch (\Exception $e){
-				DB::rollBack();
-				
-				return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
+			DB::rollBack();
+			dd($e);
+			return redirect()->back()->withFailureMessage(Lang::get('flash_messages.failed'));
 		}
 	}
 
@@ -245,7 +278,8 @@ class HomeController extends Controller
 				}
 				Session::forget('proc_devices');
 				DB::commit();
-				return redirect()->route('ris.home')->withSuccessMessage(Lang::get('flash_messages.success'));
+				return redirect()->route('ris.home')->withSuccessMessage(Lang::get('flash_messages.success'))
+													->withPid("N".$patient->id);
 			}
 			catch (\Exception $e){
 				DB::rollBack();

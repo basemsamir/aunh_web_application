@@ -11,7 +11,7 @@
         <div class="panel panel-default">
             <div class="panel-heading" > بيانات المرضي </div>
             <div class="panel-body">
-                {!! Form::open(array('id'=>'patient_form','route'=>'ris.patient_search')) !!}
+                {!! Form::open(array('id'=>'patient_form','route'=>'ris.patient.search')) !!}
                   <div class="row">
 
                     <div class="col-lg-3">
@@ -53,7 +53,11 @@
                     <th style="text-align:center">العنوان</th>
                     <th style="text-align:center">رقم التليفون</th>
                     <th style="text-align:center">الجنسية</th>
-                    <th style="text-align:center">حجز</th>
+                    @if($user_role == "Registration")
+                      <th style="text-align:center">تعديل</th>
+                    @else
+                      <th style="text-align:center">حجز</th>
+                    @endif
           				</tr>
           				</thead>
           				<tbody>
@@ -68,12 +72,19 @@
                               <td>{{  $patient->address }}</td>
                               <td>{{  $patient->phone_num }}</td>
                               <td>{{  $patient->nationality }}</td>
-                              <td align="center">
-                                <a href="{{ route('ris.show',$patient->id) }}" class="btn btn-success">
-                                  <i class="fa fa-plus"></i>
-                                </a>
-                              </td>
-                              
+                              @if($user_role == "Registration")
+                                <td align="center">
+                                  <a href="{{ route('ris.patient.edit',$patient->id) }}" class="btn btn-info">
+                                    <i class="fa fa-plus"></i>
+                                  </a>
+                                </td>
+                              @else
+                                <td align="center">
+                                  <a href="{{ route('ris.show',$patient->id) }}" class="btn btn-success">
+                                    <i class="fa fa-plus"></i>
+                                  </a>
+                                </td>
+                              @endif
                             </tr>
                         @endforeach
                       @endif

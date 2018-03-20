@@ -8,6 +8,7 @@ use App\MedicalDevice;
 use App\MedicalDeviceType;
 use App\MedicalDeviceCategory;
 use App\Http\Requests;
+use App\Http\Requests\MedicalDeviceRequest;
 
 class MedicalDevicesController extends Controller
 {
@@ -40,15 +41,8 @@ class MedicalDevicesController extends Controller
       * @param  \Illuminate\Http\Request  $request
       * @return \Illuminate\Http\Response
       */
-     public function store(Request $request)
+     public function store(MedicalDeviceRequest $request)
      {
-         //
-        
-         $rules['name']='required|min:4|max:20|unique:medical_devices,name';
-         $rules['medical_device_type_id']='required';
-         $rules['location']='min:4|max:20';
-         $message['name.unique']="أسم الجهاز موجود من قبل";
-         $this->validate($request,$rules,$message);
          MedicalDevice::create([
              'name'=>$request->name,
              'medical_device_type_id'=>$request->medical_device_type_id,
@@ -62,17 +56,14 @@ class MedicalDevicesController extends Controller
       * @param  int  $id
       * @return \Illuminate\Http\Response
       */
-     public function edit($id)
+     public function edit(MedicalDevice $medical_device)
      {
          //
          $panel_title='بيانات الأجهزة';
          $dev_active='true';
          $categories=MedicalDeviceCategory::lists('arabic_name','id');
-         $types=MedicalDeviceType::where('medical_device_category_id',$categories->keys()->first())->lists('name','id');
-         $device=MedicalDevice::with('medical_device_type.category')
-                              ->where('id',$id)
-                              ->first();
-         return view($this->base_folder_name.'.edit',compact('device','panel_title','dev_active','categories','types'));
+         $types=MedicalDeviceType::where('medical_device_category_id', $medical_device->medical_device_type->category->id)->lists('name','id');
+         return view($this->base_folder_name.'.edit',compact('medical_device','panel_title','dev_active','categories','types'));
      }
 
      /**
@@ -82,16 +73,9 @@ class MedicalDevicesController extends Controller
       * @param  int  $id
       * @return \Illuminate\Http\Response
       */
-     public function update(Request $request, $id)
+     public function update(MedicalDeviceRequest $request, MedicalDevice $medical_device)
      {
-         //
-        //dd($request->all());
-         $rules['name']='required|min:4|max:20|unique:medical_devices,name,'.$id;
-         $rules['medical_device_type_id']='required';
-         $rules['location']='min:4|max:20';
-         $message['name.unique']="أسم الجهاز موجود من قبل";
-         $this->validate($request,$rules,$message);
-         MedicalDevice::find($id)->update($request->all());
+         $medical_device->update($request->all());
          return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
      }
 
@@ -101,15 +85,13 @@ class MedicalDevicesController extends Controller
       * @param  int  $id
       * @return \Illuminate\Http\Response
       */
-     public function destroy($id)
+     public function destroy(MedicalDevice $medical_device)
      {
          //
-         $device=MedicalDevice::find($id);
-
-         if($device->procedures()->count() > 0)
-           return redirect()->action('AdminController@'.$this->action_index)->withFailureMessage('لا يمكن حذف '.$device->name.' لوجود فحوصات به ');
+         if($medical_device->procedures()->count() > 0)
+            return redirect()->action('AdminController@'.$this->action_index)->withFailureMessage('لا يمكن حذف '.$medical_device->name.' لوجود فحوصات به ');
          else {
-             $device->delete();
+             $medical_device->delete();
              return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
          }
      }

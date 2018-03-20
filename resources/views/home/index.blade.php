@@ -259,7 +259,6 @@ function calculateBOD(sid){
 var proc_device=Array();
 function addProcedure(){
 
-  $("#proc_error_message").hide();
   show_saving_state=true;
 	var row_id="row_"+$("#device option:selected").val()+"_"+$("#procedure_name option:selected").val();
 	var id=$("#device option:selected").val()+"_"+$("#procedure_name option:selected").val();
@@ -282,30 +281,34 @@ function addProcedure(){
        }
     }
 		var url = "{{ url('ajax/postProcDevice') }}";
-
-		$.ajax({
-			type: "POST",
-			url: url,
-			data:{
-        proc_device:$("#device").val()+"_"+$("#procedure_name").val(),
-        proc_date:$("#datepicker2").val(),
-        proc_status:$("#procedure_status").val(),
-        proc_dep:$("#department").val(),
-        proc_doctor:$("#xray_doctor").val(),
-        _token:"<?php echo csrf_token(); ?>"
-      },
-			success: function (data) {
-				$("#proc_device_tb").append('<tr id='+row_id+'>'+
-											'<td>'+$("#device option:selected").text()+'</td>'+
-											'<td>'+$("#procedure_name option:selected").text()+'</td>'+
-                      '<td>'+$("#datepicker2").val()+'</td>'+
-											'<td>'+'<a nohref class="btn btn-danger" onclick="delete_proc_device('+$("#device option:selected").val()+","+$("#procedure_name option:selected").val()+",false"+')"><i class="fa fa-close"></i></a>'+'</td>'+
-										   '</tr>');
-			},
-			error: function (data) {
-				alert("Error");
-			}
-		});
+    if($("#device").val() != null && $("#procedure_name").val() != null){
+      $.ajax({
+        type: "POST",
+        url: url,
+        data:{
+          proc_device:$("#device").val()+"_"+$("#procedure_name").val(),
+          proc_date:$("#datepicker2").val(),
+          proc_status:$("#procedure_status").val(),
+          proc_dep:$("#department").val(),
+          proc_doctor:$("#xray_doctor").val(),
+          _token:"<?php echo csrf_token(); ?>"
+        },
+        success: function (data) {
+          $("#proc_device_tb").append('<tr id='+row_id+'>'+
+                        '<td>'+$("#device option:selected").text()+'</td>'+
+                        '<td>'+$("#procedure_name option:selected").text()+'</td>'+
+                        '<td>'+$("#datepicker2").val()+'</td>'+
+                        '<td>'+'<a nohref class="btn btn-danger" onclick="delete_proc_device('+$("#device option:selected").val()+","+$("#procedure_name option:selected").val()+",false"+')"><i class="fa fa-close"></i></a>'+'</td>'+
+                        '</tr>');
+        },
+        error: function (data) {
+          alert("Error");
+        }
+      });
+    }
+		else{
+      alert("يجب اختيار أسم الجهاز و النوع");
+    }
 	}
 }
 function delete_proc_device(device_id,proc_id,existrow=true){

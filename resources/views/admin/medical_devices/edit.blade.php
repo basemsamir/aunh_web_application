@@ -11,20 +11,21 @@
           <div class="panel panel-default">
               <div class="panel-heading" > {{ $panel_title }} </div>
               <div class="panel-body">
-                {!! Form::model($device,['url' => "admin/medical_device/{$device->id}",'method'=>'patch']) !!}
+                {!! Form::model($medical_device,['url' => "admin/medical_device/{$medical_device->id}",'method'=>'patch']) !!}
                   <div class="form-group @if($errors->has('name')) has-error @endif">
                     {!! Form::label('الأسم') !!}
                     {!! Form::text('name',null,array('class'=>'form-control')) !!}
+                    {!! Form::hidden('id',$medical_device->id) !!}
                     @if($errors->has('name')) <span class="help-block">{{ $errors->first('name') }}</span> @endif
                   </div>
                   <div class="form-group @if($errors->has('medical_device_category_id')) has-error @endif">
                     {!! Form::label('الفئة') !!}
-                    {!! Form::select('medical_device_category_id',$categories,$device->medical_device_type->category->id,array('class'=>'form-control','onchange'=>'getTypes(event)')) !!}
+                    {!! Form::select('medical_device_category_id',$categories,$medical_device->medical_device_type->category->id,array('class'=>'form-control','onchange'=>'getTypes(event)')) !!}
                     @if($errors->has('medical_device_category_id')) <span class="help-block">{{ $errors->first('medical_device_category_id') }}</span> @endif
                   </div>
                   <div class="form-group @if($errors->has('medical_device_type_id')) has-error @endif">
                     {!! Form::label('النوع') !!}
-                    {!! Form::select('medical_device_type_id',$types,$device->medical_device_type_id,array('id'=>'medical_device_types','class'=>'form-control')) !!}
+                    {!! Form::select('medical_device_type_id',$types,$medical_device->medical_device_type_id,array('id'=>'medical_device_types','class'=>'form-control')) !!}
                     @if($errors->has('medical_device_type_id')) <span class="help-block">{{ $errors->first('medical_device_type_id') }}</span> @endif
                   </div>
                   <div class="form-group @if($errors->has('location')) has-error @endif">

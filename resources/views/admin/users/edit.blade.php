@@ -16,6 +16,7 @@
                     {!! Form::label('الأسم') !!}
                     {!! Form::text('name',null,array('class'=>'form-control')) !!}
                     @if($errors->has('name')) <span class="help-block">{{ $errors->first('name') }}</span> @endif
+                    {!! Form::hidden('id',$user->id) !!}
                   </div>
                   <div class="form-group @if($errors->has('email')) has-error @endif">
                     {!! Form::label('البريد الألكتروني') !!}

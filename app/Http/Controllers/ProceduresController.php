@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Lang;
 use App\Procedure;
 use App\ProcedureType;
 use App\Http\Requests;
+use App\Http\Requests\ProcedureRequest;
 
 class ProceduresController extends Controller
 {
@@ -36,14 +37,8 @@ class ProceduresController extends Controller
    * @param  \Illuminate\Http\Request  $request
    * @return \Illuminate\Http\Response
    */
-  public function store(Request $request)
+  public function store(ProcedureRequest $request)
   {
-      //
-
-      $rules['name']='required|min:4|max:20|unique:procedures,name';
-      $rules['proc_ris_id']='required';
-      $message['name.unique']='أسم الفحص موجود من قبل';
-      $this->validate($request,$rules,$message);
       Procedure::create($request->all());
       return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
   }
@@ -55,14 +50,13 @@ class ProceduresController extends Controller
    * @param  int  $id
    * @return \Illuminate\Http\Response
    */
-  public function edit($id)
+  public function edit(Procedure $procedure)
   {
       //
       $panel_title='بيانات الفحوصات';
       $proc_active='true';
-      $proc=Procedure::find($id);
       $proceduretypes=ProcedureType::lists('name','id');
-      return view($this->base_folder_name.'.edit',compact('proc','panel_title','proceduretypes','proc_active'));
+      return view($this->base_folder_name.'.edit',compact('procedure','panel_title','proceduretypes','proc_active'));
   }
 
   /**
@@ -72,13 +66,9 @@ class ProceduresController extends Controller
    * @param  int  $id
    * @return \Illuminate\Http\Response
    */
-  public function update(Request $request, $id)
+  public function update(ProcedureRequest $request,Procedure $procedure)
   {
-      //
-      $rules['name']='required|min:4|max:20|unique:procedures,name,'.$id;
-      $message['name.unique']='أسم الفحص موجود من قبل';
-      $this->validate($request,$rules,$message);
-      Procedure::find($id)->update($request->all());
+      $procedure->update($request->all());
       return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
   }
 
@@ -88,12 +78,9 @@ class ProceduresController extends Controller
    * @param  int  $id
    * @return \Illuminate\Http\Response
    */
-  public function destroy($id)
+  public function destroy(Procedure $procedure)
   {
-      //
-      $proc=Procedure::find($id);
-      $proc->delete();
+      $procedure->delete();
       return redirect()->action('AdminController@'.$this->action_index)->withSuccessMessage(Lang::get('flash_messages.success'));
-
   }
 }

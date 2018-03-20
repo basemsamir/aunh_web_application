@@ -12,6 +12,7 @@
 */
 //Reservation Routes
 Route::get('/', 'HomeController@index')->name('ris.home');
+
 Route::post('/create', 'HomeController@store')->name('ris.store');
 Route::get('/{vid}/edit', 'HomeController@edit')->name('ris.edit');
 Route::patch('/{vid}/edit', 'HomeController@update')->name('ris.update');
@@ -24,8 +25,12 @@ Route::post('ajax/getPatientsToday','HomeController@ajaxGetAllPatientsToday');
 Route::get('patients_proc', 'HomeController@searchPatientProc')->name('ris.patient_proc_search');
 Route::post('patients_proc', 'HomeController@postSearchPatientProc')->name('ris.patient_proc_search');
 
-Route::get('patients', 'HomeController@searchPatient')->name('ris.patient_search');
-Route::post('patients', 'HomeController@postSearchPatient')->name('ris.patient_search');
+Route::get('patients', 'HomeController@searchPatient')->name('ris.patient.show');
+Route::post('patients', 'HomeController@postSearchPatient')->name('ris.patient.search');
+Route::get('patients/registration', 'HomeController@create_patient')->name('ris.patient');
+Route::post('patients/registration', 'HomeController@store_patient')->name('ris.patient.store');
+Route::get('patients/{patient}/edit', 'HomeController@edit_patient')->name('ris.patient.edit');
+Route::patch('patients/{patient}', 'HomeController@update_patient')->name('ris.patient.update');
 
 //Login Routes...
 Route::auth();

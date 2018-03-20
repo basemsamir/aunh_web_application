@@ -1,6 +1,13 @@
 <li class="@if(isset($patient_menu_item_active)) {{ 'active '}} @endif">
-    <a href="{{ route('ris.patient_search') }}">بيانات المرضى</a>
+    <a href="{{ route('ris.patient.show') }}">بيانات المرضى</a>
 </li>
+@if($user_role == "Registration")
+<li class="@if(isset($index_menu_item_active)) {{ 'active '}} @endif">
+    <a href="{{ route('ris.patient') }}">
+        تسجيل المرضى
+    </a>
+</li>
+@else
 <li class="@if(isset($patients_proc_menu_item_active)) {{ 'active '}} @endif">
     <a href="{{ route('ris.patient_proc_search') }}">
     @if($user_role=='Lab')
@@ -17,5 +24,6 @@
         @else
             حجز فحص
         @endif
-        </a>
+    </a>
 </li>
+@endif

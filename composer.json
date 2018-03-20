@@ -10,7 +10,8 @@
 		"laravelcollective/html": "~5.0",
         "itsgoingd/clockwork": "^2.0",
         "fish/eloquent-logger": "^1.3",
-        "rap2hpoutre/laravel-log-viewer": "^0.11.0"
+        "rap2hpoutre/laravel-log-viewer": "^0.11.0",
+        "doctrine/dbal": "^2.5"
     },
     "require-dev": {
         "fzaninotto/faker": "~1.4",
